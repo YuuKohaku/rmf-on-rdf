@@ -26,7 +26,7 @@ class CommonApi extends IrisApi {
 		let cname = this.getSystemName('cache', name, params);
 		return this.db.get(cname)
 			.then((res) => res.value.content)
-			.catch((err) => {});
+			.catch((err) => ({}));
 	}
 
 	getSystemName(type, name, params = []) {

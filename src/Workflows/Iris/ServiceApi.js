@@ -22,13 +22,13 @@ class ServiceApi extends CommonApi {
 	getUserInfoFields() {
 		return this.db.get(this.startpoint.user_info_fields)
 			.then((res) => (res.value.content))
-			.catch((err) => {});
+			.catch((err) => ({}));
 	}
 
 	getQaQuestions() {
 		return this.db.get(this.startpoint.qa_questions)
 			.then((res) => (res.value.content))
-			.catch((err) => []);
+			.catch((err) => ([]));
 	}
 
 	cacheServiceIds() {

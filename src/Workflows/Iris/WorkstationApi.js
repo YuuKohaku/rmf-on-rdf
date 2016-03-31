@@ -53,46 +53,25 @@ class WorkstationApi extends CommonApi {
 		if (!org_key) return {};
 		let org_keys = _.uniq(_.castArray(org_key));
 		let orgs = {};
-		let paths = {};
 		return this.getOrganizationTree()
 			.then((orgtree) => {
 				let Organization = this.models["Organization"];
-				let recurse = (tree, path = []) => {
-					_.map(tree.has_unit, (node, index) => {
-						path.push(`has_unit.${index}`);
-						let k = _.join(path, '.');
-						let mod = new Organization();
-						mod.build(node);
-						orgs[k] = mod.serialize();
-						paths[k] = ({
-							path,
-							id: orgs[k].id
-						});
-
-						if (_.isArray(node.has_unit) || _.isPlainObject(node.has_unit)) {
-							return recurse(node, _.clone(path));
-						} else {
-							return paths;
-						}
-					});
-				};
-				recurse({
-					has_unit: orgtree
-				});
+				orgs = _(orgtree)
+					.map((v) => {
+						let item = new Organization();
+						item.build(v);
+						return item.serialize();
+					})
+					.keyBy("id")
+					.value();
 				return _.reduce(org_keys, (acc, key) => {
-					let org = _.find(_.values(paths), ({
-						path,
-						id
-					}) => {
-						return id == key;
-					});
-					acc[key] = {};
-					let p = _.clone(org.path);
-					let level = 0;
-					while (!_.isEmpty(p)) {
-						acc[key][level] = orgs[_.join(p, ".")];
-						_.unset(acc[key][level], 'has_unit');
-						p = _.dropRight(p);
+					let org = orgs[key];
+					acc[key] = {
+						'0': org
+					};
+					let level = 1;
+					while (org.unit_of) {
+						acc[key][level] = org = orgs[org.unit_of];
 						level++;
 					}
 					return acc;
