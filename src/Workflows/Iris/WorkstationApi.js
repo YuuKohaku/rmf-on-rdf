@@ -27,22 +27,24 @@ class WorkstationApi extends CommonApi {
 
 	cacheWorkstations() {
 		return this.db.N1ql.direct({
-				query: `SELECT  \`@id\` as id, \`@type\` as type, attached_to, occupied_by, device_type, provides, has_schedule, maintains FROM \`${this.db.bucket_name}\` WHERE attached_to IS NOT MISSING AND \`@type\` in ${JSON.stringify(_.keys(this.models))} ORDER BY type, id ASC`
+				query: `SELECT  \`@id\` as id, \`@type\` as type, attached_to, short_label, occupied_by, device_type, provides, has_schedule, maintains FROM \`${this.db.bucket_name}\` WHERE attached_to IS NOT MISSING AND \`@type\` in ${JSON.stringify(_.keys(this.models))} ORDER BY type, id ASC`
 			})
 			.then((res) => {
 				// console.log("CACHE RES", res);
 				let data = _(res)
-					.groupBy('device_type')
+					.groupBy('attached_to')
 					.mapValues((val, d_type) => _.map(val, v => {
 						v.active = !_.isEmpty(v.occupied_by);
 						return v;
 					}))
 					.value();
-				return super.setCache('workstations', [], data);
+				return Promise.props(_.mapValues(data, (org_data, org) => {
+					return this.setCache('workstations', [org], _.groupBy(org_data, 'device_type'));
+				}));
 			});
 	}
-	getWorkstationsCache() {
-		return super.getCache('workstations');
+	getWorkstationsCache(org) {
+		return super.getCache('workstations', [org]);
 	}
 
 	getOrganizationTree() {
