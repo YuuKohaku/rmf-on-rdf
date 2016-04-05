@@ -46,20 +46,20 @@ module.exports = {
 				final: function (res) {
 					// console.log(":FOUND TICKS", res);
 					_.unset(query, 'dedicated_date');
-					let filtered = _.filter(_.map(_.compact(res.tickets), "value"), (tick) => {
+					let filtered = _.filter(_.compact(res.tickets), (tick) => {
 						return _.reduce(query, (acc, val, key) => {
 							let res = true;
 							// console.log("COMPARING", key, val, tick[key]);
 							if (!_.isPlainObject(val)) {
 								//OR
-								res = !_.isEmpty(_.intersection(_.castArray(val), _.castArray(tick[key])));
+								res = !_.isEmpty(_.intersection(_.castArray(val), _.castArray(tick.value[key])));
 							} else {
-								res = _.isEqual(val, tick[key]);
+								res = _.isEqual(val, tick.value[key]);
 							}
 							return res && acc;
 						}, true);
 					});
-					let keyed = _.keyBy(filtered, "@id");
+					let keyed = _.keyBy(filtered, "value.@id");
 					// console.log("REDUCED TICKS", keyed);
 					return keyed;
 				}
@@ -74,8 +74,26 @@ module.exports = {
 		}
 	},
 	set: (data) => {
-		if (_.every(data, (d) => !_.isUndefined(d["@id"])))
-			return basic.set(data);
+		// console.log("SETTING TICK", data);
+		if (_.every(data, (d) => !_.isUndefined(d["@id"]))) {
+			let options = {};
+			let access = _.map(data, (item) => {
+				let entity = item;
+				if (entity.cas)
+					options[entity['@id']] = {
+						cas: entity.cas
+					};
+				_.unset(entity, 'cas');
+				return entity;
+			});
+			// console.log("CHANGE TICK", access, options);
+			return {
+				values: {
+					data: access
+				},
+				options
+			};
+		}
 		let access = _.map(data, (entity) => {
 			_.unset(entity, 'cas');
 			let dedicated_date = _.isString(entity.dedicated_date) ? entity.dedicated_date : entity.dedicated_date.format("YYYY-MM-DD");
@@ -83,7 +101,6 @@ module.exports = {
 			entity["@id"] = makeKey(entity.org_destination, dedicated_date);
 			return entity;
 		});
-		// console.log("SETTING TICK", access);
 		return {
 			type: 'counter',
 			delimiter,

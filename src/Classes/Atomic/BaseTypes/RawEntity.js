@@ -25,13 +25,14 @@ class RawEntity {
 		} else {
 			content_map.type = data.type || data['@type'] || this.entity_type.name;
 			content_map.id = data.id || data['@id'];
+			entity.cas = data.cas;
 		}
 		_.map(entity.fields, (key) => {
 			if (_.isUndefined(build_data[key])) return;
 			content_map[key] = build_data[key];
 		});
 
-		// console.log("RE CM", content_map, data);
+		// console.log("RE CM", data, entity);
 		this.content = entity.build(content_map) || entity;
 	}
 
@@ -56,7 +57,7 @@ class RawEntity {
 			}
 			return acc;
 		}, {});
-		// console.log("KT", db_data);
+		// console.log("KT", db_data, this.content);
 		return _.isFunction(this.content.transformKeys) ? this.content.transformKeys(db_data) : db_data;
 	}
 

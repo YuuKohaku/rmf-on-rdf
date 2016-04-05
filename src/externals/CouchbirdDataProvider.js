@@ -66,7 +66,13 @@ class CouchbirdDataProvider extends AbstractDataProvider {
 					});
 			}, [])
 			.then((res) => {
-				let out = _.mapValues(_.keyBy(res, 'name'), (t) => _.values(t.nodes));
+				let out = _(res)
+					.keyBy('name')
+					.mapValues(t => _(t.nodes)
+						.values()
+						.filter(v => !_.isUndefined(v))
+						.value())
+					.value();
 				return _.isFunction(q.final) ? q.final(out) : out;
 			});
 	}
