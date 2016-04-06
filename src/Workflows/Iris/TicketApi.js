@@ -22,6 +22,14 @@ class TicketApi extends CommonApi {
 			.catch(err => []);
 	}
 
+	getCodeLookup(code) {
+		return super.getLookup('ticket', [code]);
+	}
+
+	setCodeLookup(ticket, code) {
+		return super.setLookup('ticket', [code], ticket);
+	}
+
 	cacheServiceSlots(data) {
 		return super.setCache('service_slots', [], data);
 	}

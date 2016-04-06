@@ -42,6 +42,22 @@ class CommonApi extends IrisApi {
 			"content": data
 		});
 	}
+	getLookup(name, params = []) {
+		let cname = this.getSystemName('lookup', name, params);
+		return this.db.get(cname)
+			.then((res) => res.value.content)
+			.catch((err) => {});
+	}
+
+	setLookup(name, params = [], data) {
+		let cname = this.getSystemName('lookup', name, params);
+		return this.db.upsert(cname, {
+			"@id": cname,
+			"@category": _.camelCase(name),
+			"@type": "Description",
+			"content": data
+		});
+	}
 
 	getGlobal(name, params = []) {
 		let cname = this.getSystemName('global', name, params);
