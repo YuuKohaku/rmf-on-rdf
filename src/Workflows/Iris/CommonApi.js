@@ -54,7 +54,7 @@ class CommonApi extends IrisApi {
 		return this.db.upsert(cname, {
 			"@id": cname,
 			"@category": _.camelCase(name),
-			"@type": "Description",
+			"@type": "Lookup",
 			"content": data
 		});
 	}

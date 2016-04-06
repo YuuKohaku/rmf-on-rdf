@@ -40,16 +40,16 @@ class ServiceApi extends CommonApi {
 			});
 	}
 
-	cacheServiceQuota(data) {
-		return super.setCache('service_quota', [], data);
+	cacheServiceQuota(office, data) {
+		return super.setCache('service_quota', [office], data);
 	}
 
-	getServiceQuota() {
-		return super.getCache('service_quota');
+	getServiceQuota(office) {
+		return super.getCache('service_quota', [office]);
 	}
 
-	lockQuota() {
-		let name = super.getSystemName('cache', 'service_quota', ['flag']);
+	lockQuota(office) {
+		let name = super.getSystemName('cache', 'service_quota', [office, 'flag']);
 		return this.db.get(name)
 			.then(cnt => {
 				if (cnt && (cnt.value > 0))
@@ -60,8 +60,8 @@ class ServiceApi extends CommonApi {
 				});
 			});
 	}
-	unlockQuota() {
-		let name = super.getSystemName('cache', 'service_quota', ['flag']);
+	unlockQuota(office) {
+		let name = super.getSystemName('cache', 'service_quota', [office, 'flag']);
 		return this.db.get(name)
 			.then(cnt => {
 				if (cnt && (cnt.value < 1))

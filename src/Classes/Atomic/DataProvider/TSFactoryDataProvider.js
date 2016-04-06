@@ -187,9 +187,9 @@ class TSFactoryDataProvider {
 				});
 				let ticket_data = [];
 				if (!_.isEmpty(lost)) {
-					console.log("-------------------------------------------------------------------------------------------------------");
-					console.log("LOST", lost);
-					console.log("-------------------------------------------------------------------------------------------------------");
+					//		console.log("-------------------------------------------------------------------------------------------------------");
+					//		console.log("LOST", lost);
+					//		console.log("-------------------------------------------------------------------------------------------------------");
 				}
 				if (params.existing_only)
 					return placed;
@@ -311,9 +311,9 @@ class TSFactoryDataProvider {
 				// console.log("NEWTICKS", new_tickets, lost_old);
 				let old_placed = _.isEmpty(lost_old);
 				if (!_.isEmpty(lost)) {
-					console.log("-------------------------------------------------------------------------------------------------------");
-					console.log("LOST", lost);
-					console.log("-------------------------------------------------------------------------------------------------------");
+					//		console.log("-------------------------------------------------------------------------------------------------------");
+					//	console.log("LOST", lost);
+					//		console.log("-------------------------------------------------------------------------------------------------------");
 				}
 				let {
 					placed: placed_new,
@@ -362,7 +362,7 @@ class TSFactoryDataProvider {
 							reserved,
 							max_solid
 						};
-						_.set(acc, `${org}.${service}.${date}`, plan_stats);
+						_.set(acc, `${service}.${date}`, plan_stats);
 						return acc;
 					}, {});
 					// console.log("NEW", require('util')
