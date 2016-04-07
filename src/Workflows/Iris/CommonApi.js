@@ -161,13 +161,6 @@ class CommonApi extends IrisApi {
 			});
 	}
 
-	getAllEntries(query) {
-		return Promise.props(_.reduce(_.keys(this.content), (acc, key) => {
-			acc[key] = this.getEntry(key, query);
-			return acc;
-		}, {}));
-	}
-
 	setEntryField(type, query, assignment, concat = true) {
 		let t = assignment;
 		return this.getEntry(type, query)
