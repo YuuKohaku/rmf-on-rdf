@@ -53,6 +53,37 @@ class WorkstationApi extends CommonApi {
 		return super.getGlobal('org_structure');
 	}
 
+	getEntryTypeless(keys) {
+		let type_reg = {};
+		let typeless = [];
+		_(keys)
+			.castArray()
+			.compact()
+			.map((key) => {
+				let type = _.upperFirst(_.camelCase(_.split(key, '--', 1)));
+				if (!_.isUndefined(this.models[type])) {
+					type_reg[type] = type_reg[type] || [];
+					type_reg[type].push(key);
+				} else {
+					typeless.push(key);
+				}
+			})
+			.value();
+		let pack = _.mapValues(type_reg, (ks, type) => this.getEntry(type, {
+			keys: ks
+		}));
+		pack.typeless = super.getEntryTypeless(typeless);
+		return Promise.props(pack)
+			.then((res) => {
+				let data = _(res)
+					.flatMap(_.values)
+					.keyBy('id')
+					.value();
+				// console.log("TG RES", data);
+				return data;
+			})
+	}
+
 	getWorkstationOrganizationChain(org_key) {
 		if (!org_key) return {};
 		let org_keys = _.uniq(_.castArray(org_key));

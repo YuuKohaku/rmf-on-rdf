@@ -12,10 +12,11 @@ function generic(Model, finalizer = 'basic') {
 				result.keys = [];
 				result.query = item.getAsQuery();
 				result.select = data.select;
-				// console.log("GKM ASQUERY", result);
+				// console.log("GKM ASQUERY", result, data);
 			}
 			if (data.keys) {
 				result.keys = data.keys;
+				// console.log("GKM ASKEYS", result, data);
 			}
 
 			return fin_keymaker.get(result);
