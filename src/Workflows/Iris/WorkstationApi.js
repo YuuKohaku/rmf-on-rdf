@@ -63,6 +63,10 @@ class WorkstationApi extends CommonApi {
 					.values()
 					.compact()
 					.map(v => _.pick(v, props))
+					.map(v => {
+						v.active = !_.isEmpty(v.occupied_by);
+						return v;
+					})
 					.groupBy('device_type')
 					.value();
 				return this.setCache('workstations', [org], org_data);
