@@ -53,6 +53,20 @@ class WorkstationApi extends CommonApi {
 		return super.getGlobal('org_structure');
 	}
 
+	getOrganizationTimezones() {
+		return this.getOrganizationTree()
+			.then(res => {
+				let keyed = _.keyBy(res, '@id');
+				let get_tz = (id) => {
+					return !id ? undefined : (keyed[id].org_timezone || get_tz(keyed[id].unit_of));
+				}
+				return _.reduce(res, (acc, val, key) => {
+					acc[val['@id']] = get_tz(val['@id']);
+					return acc;
+				}, {});
+			});
+	}
+
 	getEntryTypeless(keys) {
 		let type_reg = {};
 		let typeless = [];

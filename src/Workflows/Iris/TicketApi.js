@@ -14,14 +14,6 @@ class TicketApi extends CommonApi {
 		return super.getGlobal('priority_description');
 	}
 
-	getExpiredTickets(now) {
-		return this.db.N1ql.direct({
-				query: `SELECT  \`@id\` as id FROM \`${this.db.bucket_name}\` WHERE  \`@type\`='Ticket' and (\`state\`="booked" ) and \`expiry\`< ${now} ORDER BY id ASC`
-			})
-			.then((res) => _.map(res, 'id'))
-			.catch(err => []);
-	}
-
 	getCodeLookup(code) {
 		return super.getLookup('ticket', [code]);
 	}
