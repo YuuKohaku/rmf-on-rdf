@@ -9,18 +9,24 @@ class AgentApi extends CommonApi {
 	}
 
 	cacheActiveAgents() {
-		return this.db.N1ql.direct({
-				query: `SELECT  \`@id\` as id, \`@type\` as type, \`state\` FROM \`${this.db.bucket_name}\` WHERE ( \`state\`='active' OR \`state\`='paused') ORDER BY type, id ASC`
-			})
-			.then((res) => {
 
-				return super.setCache('active_agents', [],
-					_(res)
+		return this.getGlobal("membership_description")
+			.then((res) => {
+				let keys = _.map(res, 'member');
+				return this.getEntryTypeless(_.uniq(keys));
+			})
+			.then(res => {
+				let data = _(res)
+					.values()
+					.compact()
+					.filter((v) => (v.state == 'active' || v.state == 'paused'))
 					.groupBy('type')
 					.mapValues((vals, type) => _(vals)
 						.groupBy('state')
-						.mapValues((v, state) => _.map(v, 'id')))
-					.value());
+						.mapValues((v, state) => _.map(v, 'id'))
+						.value())
+					.value();
+				return super.setCache('active_agents', [], data);
 			});
 	}
 
