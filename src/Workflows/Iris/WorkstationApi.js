@@ -59,13 +59,13 @@ class WorkstationApi extends CommonApi {
 				return this.getEntryTypeless(_.map(keys, 'id'));
 			})
 			.then(res => {
-				let data = _(res)
+				let org_data = _(res)
 					.values()
 					.compact()
 					.map(v => _.pick(v, props))
 					.groupBy('device_type')
 					.value();
-				console.log(data);
+				return this.setCache('workstations', [org], org_data);
 			});
 	}
 
