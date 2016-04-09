@@ -45,8 +45,28 @@ class WorkstationApi extends CommonApi {
 				}));
 			});
 	}
+
 	getWorkstationsCache(org) {
 		return super.getCache('workstations', [org]);
+	}
+
+	updateWorkstationsCache(org) {
+		let props;
+		return this.getWorkstationsCache(org)
+			.then(res => {
+				let keys = _.flatMap(res, _.values);
+				props = _.keys(keys[0]);
+				return this.getEntryTypeless(_.map(keys, 'id'));
+			})
+			.then(res => {
+				let data = _(res)
+					.values()
+					.compact()
+					.map(v => _.pick(v, props))
+					.groupBy('device_type')
+					.value();
+				console.log(data);
+			});
 	}
 
 	getOrganizationTree() {
