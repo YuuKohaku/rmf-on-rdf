@@ -25,8 +25,7 @@ class CommonApi extends IrisApi {
 	getCache(name, params = []) {
 		let cname = this.getSystemName('cache', name, params);
 		return this.db.get(cname)
-			.then((res) => res.value.content)
-			.catch((err) => ({}));
+			.then((res) => res.value.content);
 	}
 
 	getSystemName(type, name, params = []) {
@@ -45,8 +44,7 @@ class CommonApi extends IrisApi {
 	getLookup(name, params = []) {
 		let cname = this.getSystemName('lookup', name, params);
 		return this.db.get(cname)
-			.then((res) => res.value.content)
-			.catch((err) => {});
+			.then((res) => res.value.content);
 	}
 
 	setLookup(name, params = [], data) {
@@ -62,8 +60,7 @@ class CommonApi extends IrisApi {
 	getGlobal(name, params = []) {
 		let cname = this.getSystemName('global', name, params);
 		return this.db.get(cname)
-			.then((res) => res.value.content)
-			.catch((err) => {});
+			.then((res) => res.value.content);
 	}
 
 	setGlobal(name, params = [], data) {

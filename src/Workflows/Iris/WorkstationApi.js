@@ -149,9 +149,6 @@ class WorkstationApi extends CommonApi {
 					}
 					return acc;
 				}, {});
-			})
-			.catch((err) => {
-				console.log("WSOD ERR", err.stack);
 			});
 	}
 

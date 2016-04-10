@@ -21,14 +21,12 @@ class ServiceApi extends CommonApi {
 
 	getUserInfoFields() {
 		return this.db.get(this.startpoint.user_info_fields)
-			.then((res) => (res.value.content))
-			.catch((err) => ({}));
+			.then((res) => (res.value.content));
 	}
 
 	getQaQuestions() {
 		return this.db.get(this.startpoint.qa_questions)
-			.then((res) => (res.value.content))
-			.catch((err) => ([]));
+			.then((res) => (res.value.content));
 	}
 
 	cacheServiceIds() {
@@ -38,6 +36,10 @@ class ServiceApi extends CommonApi {
 			.then((res) => {
 				return super.setCache('service_ids', [], _.map(res, 'id'));
 			});
+	}
+
+	getServiceIds() {
+		return super.getCache('service_ids');
 	}
 
 	cacheServiceQuota(office, data) {

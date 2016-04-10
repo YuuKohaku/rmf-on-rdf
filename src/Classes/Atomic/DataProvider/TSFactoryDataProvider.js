@@ -218,9 +218,6 @@ class TSFactoryDataProvider {
 				// 		depth: null
 				// 	}));
 				return placed_new;
-			})
-			.catch((err) => {
-				console.log("TS ERR", err.stack);
 			});
 
 	}
