@@ -29,17 +29,8 @@ class ServiceApi extends CommonApi {
 			.then((res) => (res.value.content));
 	}
 
-	cacheServiceIds() {
-		return this.db.N1ql.direct({
-				query: `SELECT  \`@id\` as id FROM \`${this.db.bucket_name}\` WHERE  \`@type\`='Service' ORDER BY id ASC`
-			})
-			.then((res) => {
-				return super.setCache('service_ids', [], _.map(res, 'id'));
-			});
-	}
-
 	getServiceIds() {
-		return super.getCache('service_ids');
+		return super.getRegistry('service');
 	}
 
 	cacheServiceQuota(office, data) {

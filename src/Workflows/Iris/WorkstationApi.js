@@ -36,6 +36,7 @@ class WorkstationApi extends CommonApi {
 				let data = _(res)
 					.groupBy('attached_to')
 					.mapValues((val, d_type) => _.map(val, v => {
+						v.occupied_by = _.compact(v.occupied_by);
 						v.active = !_.isEmpty(v.occupied_by);
 						return v;
 					}))
@@ -50,26 +51,34 @@ class WorkstationApi extends CommonApi {
 		return super.getCache('workstations', [org]);
 	}
 
-	updateWorkstationsCache(org) {
-		let props;
-		return this.getWorkstationsCache(org)
+	updateWorkstationsCache(organization) {
+		let props = ['id', 'type', 'attached_to', 'short_label', 'occupied_by', 'device_type', 'provides', 'has_schedule', 'maintains'];
+		return Promise.map(_.castArray(organization), org => this.getWorkstationsCache(org))
 			.then(res => {
-				let keys = _.flatMap(res, _.values);
-				props = _.keys(keys[0]);
-				return this.getEntryTypeless(_.map(keys, 'id'));
+				let keys = _(res)
+					.map(_.values)
+					.flattenDeep()
+					.map('id')
+					.uniq()
+					.compact()
+					.value();
+				return this.getEntryTypeless(keys);
 			})
 			.then(res => {
-				let org_data = _(res)
+				let data = _(res)
 					.values()
 					.compact()
 					.map(v => _.pick(v, props))
 					.map(v => {
+						v.occupied_by = _.compact(v.occupied_by);
 						v.active = !_.isEmpty(v.occupied_by);
 						return v;
 					})
-					.groupBy('device_type')
+					.groupBy('attached_to')
 					.value();
-				return this.setCache('workstations', [org], org_data);
+				return Promise.props(_.mapValues(data, (org_data, org) => {
+					return this.setCache('workstations', [org], _.groupBy(org_data, 'device_type'));
+				}));
 			});
 	}
 

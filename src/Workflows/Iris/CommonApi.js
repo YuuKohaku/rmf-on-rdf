@@ -25,7 +25,8 @@ class CommonApi extends IrisApi {
 	getCache(name, params = []) {
 		let cname = this.getSystemName('cache', name, params);
 		return this.db.get(cname)
-			.then((res) => res.value.content);
+			.then((res) => res.value.content)
+			.catch((err) => ({}));;
 	}
 
 	getSystemName(type, name, params = []) {
@@ -59,6 +60,7 @@ class CommonApi extends IrisApi {
 
 	getGlobal(name, params = []) {
 		let cname = this.getSystemName('global', name, params);
+		console.log('getting global', cname)
 		return this.db.get(cname)
 			.then((res) => res.value.content);
 	}
@@ -69,6 +71,24 @@ class CommonApi extends IrisApi {
 			"@id": cname,
 			"@category": _.camelCase(name),
 			"@type": "Description",
+			"content": data
+		});
+	}
+
+	getRegistry(name, params = []) {
+		let cname = this.getSystemName('registry', name, params);
+		console.log("C", cname)
+		return this.db.get(cname)
+			.then((res) => res.value.content)
+			.catch((err) => ([]));;
+	}
+
+	setRegistry(name, params = [], data) {
+		let cname = this.getSystemName('registry', name, params);
+		return this.db.upsert(cname, {
+			"@id": cname,
+			"@content_type": _.upperFirst(_.camelCase(name)),
+			"@type": "Registry",
 			"content": data
 		});
 	}

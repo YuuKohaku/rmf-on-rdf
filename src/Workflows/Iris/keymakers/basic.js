@@ -46,9 +46,10 @@ module.exports = {
 				return (select == '*') ? _.keyBy(query.ids, "@id") : _.map(query.ids, select);
 			}
 		};
-		// console.log("QQ ЗЗ", require('util').inspect(query, {
-		// 	depth: null
-		// }));
+		console.log("QQ ЗЗ", require('util')
+			.inspect(query, {
+				depth: null
+			}));
 		return {
 			query
 		};
