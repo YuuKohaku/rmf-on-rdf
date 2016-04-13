@@ -44,7 +44,7 @@ class Box extends Hashmap {
 			return result;
 		}
 
-		for(let i = 0; i < ids.length; i += 1) {
+		for(var i = 0; i < ids.length; i += 1) {
 			let id = ids[i];
 			collection[id] = this.content[id][method_name](passed.selection[id]);
 			if(!collection[id] || collection[id].content.length == 0) {
