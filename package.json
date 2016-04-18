@@ -31,10 +31,10 @@
   },
   "homepage": "https://github.com/artificial-life/rmf-on-rdf#readme",
   "dependencies": {
-    "bluebird": ">=3.3.4",
+    "bluebird": ">=3.3.5",
     "cbird-rdf": "git+https://github.com/YuuKohaku/cbird-rdf.git",
     "harmony-reflect": ">=1.4.5",
-    "lodash": ">=4.9.0",
+    "lodash": ">=4.11.1",
     "gulp-babel": "^6.1.2",
     "node-uuid": ">=1.4.7"
   },
