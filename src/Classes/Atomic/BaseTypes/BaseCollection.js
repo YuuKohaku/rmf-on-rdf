@@ -11,11 +11,12 @@ class BaseCollection {
 		this.collection_type = collection_type;
 		this.collection_id = collection_id || default_collection_id;
 
-		if (this.constructor.name == 'BaseCollection') return ProxifyCollection(this);
+		// if (this.constructor.name == 'BaseCollection') return ProxifyCollection(this);
 	}
 	extend(id, data) {
 		this.content[id] = data;
 	}
+
 	build(items) {
 		// console.log("BCA BUILD", items);
 		let Model = this.collection_type;
@@ -50,7 +51,23 @@ class BaseCollection {
 
 		return result;
 	}
+
+	// TEMPORARY COMMON METHOD SECTION
+	observe(...args){
+		return this.collectionMethod('observe', ...args);
+	}
+
+	reserve(...args){
+		return this.collectionMethod('reserve', ...args);
+	}
+
+	free(...args){
+		return this.collectionMethod('free', ...args);
+	}
+	// END TEMPORARY COMMON METHOD SECTION
+
 	collectionMethod(method_name, passed) {
+		console.log("COLLECTION METHOD", method_name, passed, this.collection_id);
 		let ids = passed[this.collection_id];
 		//@TODO: rework it later with iterators
 		if (ids == '*') {
@@ -84,6 +101,7 @@ class BaseCollection {
 
 		return result;
 	}
+
 	serialize() {
 		return _.reduce(this.content, (result, item, key) => {
 			let data = item.serialize();
