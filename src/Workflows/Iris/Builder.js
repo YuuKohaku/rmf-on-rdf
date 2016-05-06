@@ -17,7 +17,6 @@ let ContentAsync = require(base_dir + '/build/Classes/ContentAsync');
 let ResourceFactoryAsync = require(base_dir + '/build/Classes/ResourceFactoryAsync');
 
 let TypeModel = require(base_dir + '/build/Classes/Atomic/BaseTypes/Ticket');
-let DecoModel = require(base_dir + '/build/Classes/Atomic/BaseTypes/RawEntity');
 
 class IrisBuilder {
 	static init(db, cfg) {
@@ -152,7 +151,7 @@ class IrisBuilder {
 			});
 
 
-		let Model = DecoModel.bind(DecoModel, TypeModel);
+		let Model =  TypeModel;
 
 		factory_provider
 			.addStorage(box_storage)
