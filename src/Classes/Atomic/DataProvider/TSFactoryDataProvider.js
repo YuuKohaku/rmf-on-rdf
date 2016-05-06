@@ -173,7 +173,7 @@ class TSFactoryDataProvider {
 				placed,
 				lost
 			}) => {
-				// console.log("PLACED", require('util')
+				// console.log("PLACED OLD", require('util')
 				// 	.inspect(placed, {
 				// 		depth: null
 				// 	}));

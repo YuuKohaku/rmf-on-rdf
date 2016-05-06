@@ -1,8 +1,8 @@
 'use strict'
 
-let Fieldset = require("./Fieldset");
+let DatabaseFieldset = require("./DatabaseFieldset");
 
-class Ticket extends Fieldset {
+class Ticket extends DatabaseFieldset {
 	constructor() {
 		let fields = ['pending_tasks', 'source', "qa_answers", 'time_description', 'operator', 'alt_operator', 'history', 'service', "code", "destination", 'org_destination', "booking_date", "dedicated_date", "priority", "state", "user_info", "service_count", "called", "expiry"];
 		super(fields);

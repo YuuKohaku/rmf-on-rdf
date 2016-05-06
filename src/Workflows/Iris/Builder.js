@@ -96,10 +96,7 @@ class IrisBuilder {
 		let dp = new CouchbirdDataProvider(this.db);
 
 		let data_model = {
-			type: {
-				deco: 'RawEntity',
-				type: 'Ticket'
-			},
+			type: 'Ticket',
 			deco: 'BaseCollection',
 			params: 'box_id'
 		};

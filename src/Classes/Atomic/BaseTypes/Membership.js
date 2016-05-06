@@ -1,8 +1,8 @@
 'use strict'
 
-let Fieldset = require("./Fieldset");
+let DatabaseFieldset = require("./DatabaseFieldset");
 
-class Membership extends Fieldset {
+class Membership extends DatabaseFieldset {
 	constructor() {
 		let fields = ["organization", "member", "role"];
 		super(fields);

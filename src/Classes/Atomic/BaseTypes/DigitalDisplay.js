@@ -1,8 +1,8 @@
 'use strict'
 
-let Fieldset = require("./Fieldset");
+let DatabaseFieldset = require("./DatabaseFieldset");
 
-class DigitalDisplay extends Fieldset {
+class DigitalDisplay extends DatabaseFieldset {
 	constructor() {
 		let fields = ["default_agent", 'attached_to', "device_type", "occupied_by", "maintains", "display_type", "symbol_depth", "y_offset", "x_offset", "height", "width", "baud_rate", "data_bits", "parity", "stop_bits"];
 		super(fields);

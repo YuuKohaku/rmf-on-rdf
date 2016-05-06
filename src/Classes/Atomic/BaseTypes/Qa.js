@@ -1,8 +1,8 @@
 'use strict'
 
-let Fieldset = require("./Fieldset");
+let DatabaseFieldset = require("./DatabaseFieldset");
 
-class Qa extends Fieldset {
+class Qa extends DatabaseFieldset {
 	constructor() {
 		let fields = ["default_agent", 'attached_to', "device_type", "hold_screen_design", "parent"];
 		super(fields);

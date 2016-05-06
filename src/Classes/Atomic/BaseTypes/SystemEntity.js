@@ -1,8 +1,8 @@
 'use strict'
 
-let Fieldset = require("./Fieldset");
+let DatabaseFieldset = require("./DatabaseFieldset");
 
-class SystemEntity extends Fieldset {
+class SystemEntity extends DatabaseFieldset {
 	constructor() {
 		let fields = ["login", "password_hash", "permissions", "state", "default_workstation", "available_workstation"];
 		super(fields);

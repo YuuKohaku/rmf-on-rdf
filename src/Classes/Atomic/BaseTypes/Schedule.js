@@ -1,8 +1,8 @@
 'use strict'
 
-let Fieldset = require("./Fieldset");
+let DatabaseFieldset = require("./DatabaseFieldset");
 
-class Schedule extends Fieldset {
+class Schedule extends DatabaseFieldset {
 	constructor() {
 		let fields = ['has_time_description', "has_day"];
 		super(fields);
@@ -14,7 +14,7 @@ class Schedule extends Fieldset {
 
 	build(data) {
 		super.build(data);
-		this.content_map.has_time_description = _.castArray(data.has_time_description);
+		this.content_map.has_time_description = _.castArray(this.content_map.has_time_description);
 	}
 }
 

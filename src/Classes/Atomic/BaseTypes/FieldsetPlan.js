@@ -2,8 +2,7 @@
 
 let Plan = require('./Plan.js');
 let Schedule = require('./Schedule.js');
-let RawEntity = require('./RawEntity.js');
-let TemplateModel = RawEntity.bind(RawEntity, Schedule);
+let TemplateModel = Schedule;
 
 class FieldsetPlan extends Plan {
 	constructor(parent) {

@@ -1,8 +1,8 @@
 'use strict'
 
-let Fieldset = require("./Fieldset");
+let DatabaseFieldset = require("./DatabaseFieldset");
 
-class Administrator extends Fieldset {
+class Administrator extends DatabaseFieldset {
 	constructor() {
 		let fields = ["occupied_by", "default_agent", "attached_to", "device_type"];
 		super(fields);

@@ -1,8 +1,8 @@
 'use strict'
 
-let Fieldset = require("./Fieldset");
+let DatabaseFieldset = require("./DatabaseFieldset");
 
-class ServiceGroup extends Fieldset {
+class ServiceGroup extends DatabaseFieldset {
 	constructor() {
 		let fields = ["view_order", "view_name", "icon", "content", "items_per_page"];
 		super(fields);

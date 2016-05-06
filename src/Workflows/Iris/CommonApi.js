@@ -129,10 +129,7 @@ class CommonApi extends IrisApi {
 	initContent(ModelName) {
 		let dp = new CouchbirdDataProvider(this.db);
 		let storage_data_model = {
-			type: {
-				type: ModelName,
-				deco: 'RawEntity'
-			},
+			type: ModelName,
 			deco: 'BaseCollection',
 			params: 'id'
 		};

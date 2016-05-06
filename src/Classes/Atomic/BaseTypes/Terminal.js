@@ -1,8 +1,8 @@
 'use strict'
 
-let Fieldset = require("./Fieldset");
+let DatabaseFieldset = require("./DatabaseFieldset");
 
-class Terminal extends Fieldset {
+class Terminal extends DatabaseFieldset {
 	constructor() {
 		let fields = ["default_agent", 'attached_to', "device_type", "bound_service_groups", "occupied_by", "prebook_autoregister", "booking_methods", "reload_interval"];
 		super(fields);
