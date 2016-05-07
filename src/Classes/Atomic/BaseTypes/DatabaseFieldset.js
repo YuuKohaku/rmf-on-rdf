@@ -10,7 +10,7 @@ class DatabaseFieldset extends Fieldset{
 			//construct from db
 			this.cas = data.cas;
 			//meh
-			build_data = data.value;
+			build_data = data.value; 
 			content_map.id = build_data['@id'];
 			//@TODO use it wisely
 			content_map.type = build_data['@type'];
@@ -37,7 +37,7 @@ class DatabaseFieldset extends Fieldset{
 
 
 	transformKeys() {
-		let data = super.serialize();
+		let data = this.serialize();
 		let db_data = _.reduce(data, (acc, val, key) => {
 			if (key == 'id') {
 				acc['@id'] = val;
@@ -68,6 +68,64 @@ class DatabaseFieldset extends Fieldset{
 			return acc;
 		}, {});
 		return  db_data;
+	}
+
+	static buildSerialized(data){
+		let content_map = {};
+		let build_data = data;
+
+		if (data.value) {
+			build_data = data.value; 
+			content_map.id = build_data['@id'];
+			content_map.type = build_data['@type'];
+		} else {
+			content_map.type = data.type || data['@type'] || this.name;
+			content_map.id = data.id || data['@id'];
+		}
+
+		_.map(this.fields, (key) => {
+			if (_.isUndefined(build_data[key])) return;
+			content_map[key] = build_data[key];
+		});
+
+		// console.log("RE CM", data, entity);
+		let serialized = super.buildSerialized(content_map);
+		serialized.cas = data.cas;
+		serialized.class = this.name;
+
+		return serialized;
+	}
+
+	static _transformKeys(data){
+		let transformed = this.buildSerialized(data);
+		let db_data = _.reduce(transformed, (acc, val, key) => {
+			if (key == 'id') {
+				acc['@id'] = val;
+			} else if (key == 'type') {
+				acc['@type'] = val || transformed.class;
+			} else if (key == 'cas') {
+				acc.cas = val;
+			} else if (!_.includes(['class'], key)) {
+				acc[key] = val;
+			}
+			return acc;
+		}, {});
+		// console.log("KT", db_data, this.content);
+		return db_data;		
+	}
+
+	static buildQuery(data){
+		let transformed = this.transformKeys(data);
+		let db_data = _.reduce(transformed, (acc, val, key) => {
+			if (!_.isUndefined(val)) acc[key] = val;
+				return acc;
+		}, {});
+		return  db_data;
+	}
+
+	static buildDbData(data){
+		let db_data = this.transformKeys(data);
+		return db_data;
 	}
 
 	observe(){

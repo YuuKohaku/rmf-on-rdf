@@ -4,11 +4,15 @@ let DatabaseFieldset = require("./DatabaseFieldset");
 
 class Schedule extends DatabaseFieldset {
 	constructor() {
-		let fields = ['has_time_description', "has_day"];
+		let fields = this.constructor.fields;
 		super(fields);
 	}
 
-	get references() {
+	static get fields(){
+		return  ['has_time_description', "has_day"];
+	}
+
+	static get references() {
 		return ["has_day", "has_owner"];
 	}
 

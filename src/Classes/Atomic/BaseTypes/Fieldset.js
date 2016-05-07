@@ -2,7 +2,7 @@
 
 class Fieldset {
 	constructor(fields) {
-		let props = _.concat(["id", "type", 'label', "short_label", "description"], fields);
+		let props = _.concat(this.constructor.fields, fields);
 		this.content_map = _.reduce(props, (acc, field) => {
 			acc[field] = undefined;
 			return acc;
@@ -11,6 +11,10 @@ class Fieldset {
 
 	get fields() {
 		return _.keys(this.content_map);
+	}
+
+	static get fields() {
+		return ["id", "type", 'label', "short_label", "description"];
 	}
 
 	build(data) {
@@ -25,6 +29,13 @@ class Fieldset {
 		let data = {};
 		_.merge(data, this.content_map);
 		return data;
+	}
+
+	static buildSerialized(data){
+		return _.reduce(this.fields, (content_map, property) => {
+			if (!_.isUndefined(data[property]))
+				content_map[property] = data[property];
+		}, {});
 	}
 }
 

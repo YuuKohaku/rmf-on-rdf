@@ -7,10 +7,8 @@ function generic(Model, finalizer = 'basic') {
 		get: (data) => {
 			let result = data;
 			if (data.query) {
-				let item = new Model();
-				item.build(data.query);
 				result.keys = [];
-				result.query = item.getAsQuery();
+				result.query = Model.buildQuery(data.query);
 				result.select = data.select;
 				// console.log("GKM ASQUERY", result, data);
 			}
@@ -24,10 +22,8 @@ function generic(Model, finalizer = 'basic') {
 		set: (data) => {
 			let items = _.castArray(data);
 			let result = _.map(items, (t_data) => {
-				let item = new Model();
-				item.build(t_data);
 				// console.log("DBSERIALIZED GENERIC", item.dbSerialize());
-				return item.dbSerialize();
+				return Model.buildDbData(t_data);
 			});
 			return fin_keymaker.set(result);
 		}

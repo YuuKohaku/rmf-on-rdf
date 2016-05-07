@@ -4,8 +4,12 @@ let DatabaseFieldset = require("./DatabaseFieldset");
 
 class Ticket extends DatabaseFieldset {
 	constructor() {
-		let fields = ['pending_tasks', 'source', "qa_answers", 'time_description', 'operator', 'alt_operator', 'history', 'service', "code", "destination", 'org_destination', "booking_date", "dedicated_date", "priority", "state", "user_info", "service_count", "called", "expiry"];
+		let fields = this.constructor.fields;
 		super(fields);
+	}
+
+	static get fields(){
+		return  ['pending_tasks', 'source', "qa_answers", 'time_description', 'operator', 'alt_operator', 'history', 'service', "code", "destination", 'org_destination', "booking_date", "dedicated_date", "priority", "state", "user_info", "service_count", "called", "expiry"];
 	}
 
 	build(data) {
@@ -14,7 +18,7 @@ class Ticket extends DatabaseFieldset {
 			this.content_map.service_count = _.parseInt(this.content_map.service_count);
 	}
 
-	get references() {
+	static get references() {
 		return ['pending_tasks', 'service', 'operator', 'alt_operator', 'destination', 'org_destination', 'source'];
 	}
 

@@ -4,8 +4,16 @@ let DatabaseFieldset = require("./DatabaseFieldset");
 
 class Membership extends DatabaseFieldset {
 	constructor() {
-		let fields = ["organization", "member", "role"];
+		let fields = this.constructor.fields;
 		super(fields);
+	}
+
+	static get fields(){
+		return   ["organization", "member", "role"];
+	}
+
+	static get references(){
+		return   ["organization", "member", "role"];		
 	}
 }
 
