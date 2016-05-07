@@ -97,9 +97,7 @@ class CommonApi extends IrisApi {
 				// console.log("TYPELESS RES", res);
 				return _.mapValues(res, (val, key) => {
 					let Model = this.models[val.value["@type"]];
-					let item = new Model();
-					item.build(val);
-					return item.serialize();
+					return Model.buildSerialized(val);
 				})
 			})
 			.catch((err) => {
@@ -113,9 +111,7 @@ class CommonApi extends IrisApi {
 			.then(() => {
 				let data_serialized = _.map(_.castArray(data), (val, key) => {
 					let Model = this.models[val.type];
-					let item = new Model();
-					item.build(val);
-					return item.dbSerialize();
+					return Model.buildDbData(val);
 				});
 
 				return this.db.upsertNodes(data_serialized);
@@ -163,7 +159,7 @@ class CommonApi extends IrisApi {
 	}
 
 	getEntry(type, query) {
-		// console.log("GET", type, query, this.models);
+		// console.log("GET", type, query);
 		return ((!type || !this.content[type]) && query.keys) ?
 			this.getEntryTypeless(query.keys) :
 			this.content[type].resolve(query)
@@ -177,6 +173,7 @@ class CommonApi extends IrisApi {
 		let t = assignment;
 		return this.getEntry(type, query)
 			.then(res => {
+				// console.log("ENTRY",res);
 				let set = _.map(res, entry => {
 					return _.mergeWith(entry, t, (objValue, srcValue, key) => {
 						if (concat && _.isArray(objValue)) {

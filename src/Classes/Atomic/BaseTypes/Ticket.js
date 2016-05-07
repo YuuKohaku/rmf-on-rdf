@@ -15,7 +15,8 @@ class Ticket extends DatabaseFieldset {
 	
 	static buildSerialized(data){
 		let serialized = super.buildSerialized(data);
-		serialized.service_count = _.parseInt(serialized.service_count);
+		if (_.isString(serialized.service_count))
+			serialized.service_count = _.parseInt(serialized.service_count);
 		return  serialized;
 	}
 

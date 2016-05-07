@@ -32,7 +32,8 @@ class Fieldset {
 	}
 
 	static buildSerialized(data){
-		return _.reduce(this.fields, (content_map, property) => {
+		let props = _.concat(this.fields, Fieldset.fields);
+		return _.reduce(props, (content_map, property) => {
 			if (!_.isUndefined(data[property]))
 				content_map[property] = data[property];
 			return content_map;

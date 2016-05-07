@@ -88,10 +88,11 @@ class DatabaseFieldset extends Fieldset{
 			content_map[key] = build_data[key];
 		});
 
-		// console.log("RE CM", data, entity);
+		// console.log("RE CM", content_map);
 		let serialized = super.buildSerialized(content_map);
 		serialized.cas = data.cas;
 		serialized.class = this.name;
+		// console.log("RE CM ||", serialized);
 
 		return serialized;
 	}
