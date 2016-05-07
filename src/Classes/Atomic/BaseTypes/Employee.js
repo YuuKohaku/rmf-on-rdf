@@ -3,11 +3,6 @@
 let DatabaseFieldset = require("./DatabaseFieldset");
 
 class Employee extends DatabaseFieldset {
-	constructor() {
-		let fields = this.constructor.fields;
-		super(fields);
-	}
-
 	static get fields(){
 		return ["phone", "first_name", "last_name", "middle_name", "login", "password_hash", "provides", "has_schedule", "permissions", "state", "default_workstation", "available_workstation"];
 	}

@@ -67,7 +67,7 @@ class BaseCollection {
 	// END TEMPORARY COMMON METHOD SECTION
 
 	collectionMethod(method_name, passed) {
-		console.log("COLLECTION METHOD", method_name, passed, this.collection_id);
+		// console.log("COLLECTION METHOD", method_name, passed, this.collection_id);
 		let ids = passed[this.collection_id];
 		//@TODO: rework it later with iterators
 		if (ids == '*') {

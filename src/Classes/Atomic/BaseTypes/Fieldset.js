@@ -1,8 +1,8 @@
 'use strict'
 
 class Fieldset {
-	constructor(fields) {
-		let props = _.concat(this.constructor.fields, fields);
+	constructor() {
+		let props = _.concat(this.constructor.fields, Fieldset.fields);
 		this.content_map = _.reduce(props, (acc, field) => {
 			acc[field] = undefined;
 			return acc;
@@ -35,6 +35,7 @@ class Fieldset {
 		return _.reduce(this.fields, (content_map, property) => {
 			if (!_.isUndefined(data[property]))
 				content_map[property] = data[property];
+			return content_map;
 		}, {});
 	}
 }

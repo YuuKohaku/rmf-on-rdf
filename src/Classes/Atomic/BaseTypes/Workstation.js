@@ -3,11 +3,6 @@
 let DatabaseFieldset = require("./DatabaseFieldset");
 
 class Workstation extends DatabaseFieldset {
-	constructor() {
-		let fields = this.constructor.fields;
-		super(fields);
-	}
-
 	static get fields(){
 		return  ["occupied_by", "provides", "has_schedule", "default_agent", "attached_to", "device_sound", "device_design", "device_type", "digital_display_address"];
 	}

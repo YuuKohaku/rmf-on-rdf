@@ -115,7 +115,7 @@ class DatabaseFieldset extends Fieldset{
 	}
 
 	static buildQuery(data){
-		let transformed = this.transformKeys(data);
+		let transformed = this._transformKeys(data);
 		let db_data = _.reduce(transformed, (acc, val, key) => {
 			if (!_.isUndefined(val)) acc[key] = val;
 				return acc;
@@ -124,7 +124,7 @@ class DatabaseFieldset extends Fieldset{
 	}
 
 	static buildDbData(data){
-		let db_data = this.transformKeys(data);
+		let db_data = this._transformKeys(data);
 		return db_data;
 	}
 
