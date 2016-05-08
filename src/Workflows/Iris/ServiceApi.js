@@ -78,9 +78,7 @@ class ServiceApi extends CommonApi {
 							return Promise.resolve({});
 						let type = val.value['@type'];
 						let Model = this.models[type];
-						let item = new Model();
-						item.build(val);
-						let data = item.serialize();
+						let data = Model.buildSerialized(val);
 						if (type === "ServiceGroup") {
 							groups[key] = data;
 							return unroll(data.content);

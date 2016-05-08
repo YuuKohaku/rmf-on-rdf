@@ -18,7 +18,8 @@ class Fieldset {
 	}
 
 	build(data) {
-		_.map(this.fields, (property) => {
+		let props = _.concat(this.constructor.fields, Fieldset.fields);
+		_.map(props, (property) => {
 			if (!_.isUndefined(data[property]))
 				this.content_map[property] = data[property];
 		});

@@ -140,9 +140,7 @@ class WorkstationApi extends CommonApi {
 				let Organization = this.models["Organization"];
 				orgs = _(orgtree)
 					.map((v) => {
-						let item = new Organization();
-						item.build(v);
-						return item.serialize();
+						return Organization.buildSerialized(v);
 					})
 					.keyBy("id")
 					.value();

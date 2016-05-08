@@ -6,6 +6,7 @@ class DatabaseFieldset extends Fieldset{
 	build(data) {
 		let content_map = {};
 		let build_data = data;
+		let props = _.concat(this.constructor.fields, super.fields);
 		if (data.value) {
 			//construct from db
 			this.cas = data.cas;
@@ -19,12 +20,12 @@ class DatabaseFieldset extends Fieldset{
 			content_map.id = data.id || data['@id'];
 			this.cas = data.cas;
 		}
-		_.map(this.fields, (key) => {
+		_.map(props, (key) => {
 			if (_.isUndefined(build_data[key])) return;
 			content_map[key] = build_data[key];
 		});
 
-		// console.log("RE CM", data, entity);
+		// console.log("RE B CM", props);
 		return super.build(content_map);
 	}
 
@@ -82,8 +83,9 @@ class DatabaseFieldset extends Fieldset{
 			content_map.type = data.type || data['@type'] || this.name;
 			content_map.id = data.id || data['@id'];
 		}
+		let props = _.concat(this.fields, super.fields);
 
-		_.map(this.fields, (key) => {
+		_.map(props, (key) => {
 			if (_.isUndefined(build_data[key])) return;
 			content_map[key] = build_data[key];
 		});
@@ -92,7 +94,7 @@ class DatabaseFieldset extends Fieldset{
 		let serialized = super.buildSerialized(content_map);
 		serialized.cas = data.cas;
 		serialized.class = this.name;
-		// console.log("RE CM ||", serialized);
+		// console.log("RE SB CM ||", props);
 
 		return serialized;
 	}

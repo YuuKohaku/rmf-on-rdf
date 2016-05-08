@@ -59,7 +59,6 @@ class CommonApi extends IrisApi {
 
 	getGlobal(name, params = []) {
 		let cname = this.getSystemName('global', name, params);
-		console.log('getting global', cname)
 		return this.db.get(cname)
 			.then((res) => _.get(res, 'value.content', false));
 	}
@@ -76,7 +75,6 @@ class CommonApi extends IrisApi {
 
 	getRegistry(name, params = []) {
 		let cname = this.getSystemName('registry', name, params);
-		console.log("C", cname)
 		return this.db.get(cname)
 			.then((res) => _.get(res, 'value.content', []));
 	}
