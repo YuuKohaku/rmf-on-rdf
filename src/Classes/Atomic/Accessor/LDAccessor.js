@@ -25,8 +25,7 @@ class LDAccessor extends BasicAccessorAsync {
 			options: context.options || {}
 		};
 		access_obj = _.assign(access_obj, this.makeAccessObject('get', context));
-		// let tm = Date.now();
-
+		
 		return Promise.resolve(this.data_provider.get(access_obj));
 	}
 

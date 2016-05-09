@@ -67,7 +67,7 @@ class ServiceApi extends CommonApi {
 	getServiceTree(query) {
 		let groups = {};
 		let services = {};
-		let direct = this.content['ServiceGroup'].accessor;
+		let direct = this.content['ServiceGroup'];
 		let unroll = (keys) => {
 			return direct.get({
 					keys

@@ -29,6 +29,8 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 		let service_id = selection.service;
 		let time_description = selection.time_description;
 
+		let time = process.hrtime();
+
 		return this.ingredient.resolve({
 				query: selection
 			})
@@ -38,6 +40,10 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 				// 	.inspect(resolved.content_map, {
 				// 		depth: null
 				// 	}));
+				let diff = process.hrtime(time);
+				// console.log("INGREDIENT RESOLVE IN %d msec", (diff[0]*1e9 + diff[1])/1000000);
+				time = process.hrtime();
+
 				let observed = {
 					services: resolved.getAtom(services_path)
 						.observe({
@@ -59,6 +65,10 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 						})
 				};
 
+				diff = process.hrtime(time);
+				// console.log("INGREDIENT OBSERVE IN %d msec", (diff[0]*1e9 + diff[1])/1000000);
+				time = process.hrtime();
+
 				let services = observed.services.content;
 				let ops = observed.ops.content;
 				let plans = observed.plans.content;
@@ -79,6 +89,11 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 					}, {});
 					return acc;
 				}, {});
+			})
+			.then((res) => {
+				let diff = process.hrtime(time);
+				// console.log("FIN IN %d msec", (diff[0]*1e9 + diff[1])/1000000);
+				return res;
 			});
 
 	}

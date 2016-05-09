@@ -1,6 +1,7 @@
 'use strict'
 
 let uuid = require('node-uuid');
+let time;
 
 class TSFactoryDataProvider {
 	constructor() {
@@ -34,7 +35,7 @@ class TSFactoryDataProvider {
 	}
 
 	getSource(sources, query) {
-		let picker = _.castArray(query.operator || query.alt_operator);
+		let picker = _.compact(_.castArray(query.operator || query.alt_operator));
 		// console.log("PICKER", picker, query);
 		let cnt = query.service_count > 0 ? query.service_count : 1;
 		let ops = _.reduce(_.pick(sources, picker), (acc, op_s, op_id) => {
@@ -96,6 +97,7 @@ class TSFactoryDataProvider {
 	resolvePlacing(tickets, sources, set_data = false) {
 		let remains = sources;
 		let ordered = this.order(tickets);
+		// console.log("ORDERED", tickets);
 		let ops_by_service = _.reduce(remains, (acc, val, key) => {
 			_.map(_.keys(val), (s_id) => {
 				acc[s_id] = acc[s_id] || [];
@@ -142,7 +144,7 @@ class TSFactoryDataProvider {
 					result[property] = ingredient.get(params);
 					return result;
 				}, {})),
-				tickets: this.storage_accessor.resolve({
+				tickets: this.storage_accessor.get({
 					query: {
 						dedicated_date: params.selection.ldplan.dedicated_date,
 						org_destination: params.selection.ldplan.organization,
@@ -157,8 +159,12 @@ class TSFactoryDataProvider {
 				},
 				tickets
 			}) => {
-				// console.log("EXISTING TICKS", _.values(tickets.serialize()));
-				return this.resolvePlacing(_.values(tickets.serialize()), plans, true);
+				let diff = process.hrtime(time);
+				// console.log("PLACE EXISTING NULL IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
+				time = process.hrtime();
+
+				// console.log("EXISTING TICKS", tickets , this.finalizer(_.values(tickets)));
+				return this.resolvePlacing(this.finalizer(_.values(tickets)), plans, true);
 			});
 	}
 
@@ -167,12 +173,17 @@ class TSFactoryDataProvider {
 		// 	.inspect(params, {
 		// 		depth: null
 		// 	}));
+		time = process.hrtime();
 		return this.placeExisting(params)
 			.then(({
 				remains,
 				placed,
 				lost
 			}) => {
+				let diff = process.hrtime(time);
+				// console.log("PLACE EXISTING IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
+				time = process.hrtime();
+
 				// console.log("PLACED OLD", require('util')
 				// 	.inspect(placed, {
 				// 		depth: null
@@ -207,7 +218,17 @@ class TSFactoryDataProvider {
 						});
 					}
 				});
+
+				diff = process.hrtime(time);
+				// console.log("TICKS DATA PREPARED IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
+				time = process.hrtime();
+
 				let new_tickets = this.finalizer(ticket_data);
+
+				diff = process.hrtime(time);
+				// console.log("FINALIZED IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
+				time = process.hrtime();
+
 				let {
 					placed: placed_new,
 					lost: lost_new,
@@ -217,6 +238,11 @@ class TSFactoryDataProvider {
 				// 	.inspect(remains_new, {
 				// 		depth: null
 				// 	}));
+
+				diff = process.hrtime(time);
+				// console.log("PLACE NEW IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
+				time = process.hrtime();
+
 				return placed_new;
 			});
 
@@ -242,7 +268,7 @@ class TSFactoryDataProvider {
 					_.unset(tick, 'destination');
 				}
 				// console.log("TICK SV", tick, saved);
-				return this.storage_accessor.save(tick)
+				return this.storage_accessor.set(tick)
 					.catch((err) => {
 						console.log(err.stack);
 						return false;
@@ -258,11 +284,11 @@ class TSFactoryDataProvider {
 		// 	}));
 		if (params.reserve) {
 			let keys = _.map(new_tickets, 'id');
-			return this.storage_accessor.resolve({
+			return this.storage_accessor.get({
 					keys
 				})
 				.then((tickets) => {
-					let prev_set = _.keyBy(tickets.serialize(), 'id');
+					let prev_set = _.keyBy(this.finalizer(_.values(tickets)), 'id');
 					let next_set = _.keyBy(new_tickets, 'id');
 					let to_free = {};
 					let to_reserve = _.mergeWith(prev_set, next_set, (objValue, srcValue, key, obj, src) => {
@@ -370,7 +396,7 @@ class TSFactoryDataProvider {
 
 
 				return Promise.props({
-					placed: this.storage_accessor.save(placed_new),
+					placed: this.storage_accessor.set(placed_new),
 					out_of_range,
 					lost: all_lost,
 					stats

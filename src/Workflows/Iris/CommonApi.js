@@ -20,6 +20,7 @@ class CommonApi extends IrisApi {
 		super();
 		this.content = {};
 		this.startpoint = startpoint;
+		this.models = {};
 	}
 
 	getCache(name, params = []) {
@@ -59,7 +60,7 @@ class CommonApi extends IrisApi {
 
 	getGlobal(name, params = []) {
 		let cname = this.getSystemName('global', name, params);
-		return this.db.get(cname)
+ 		return this.db.get(cname)
 			.then((res) => _.get(res, 'value.content', false));
 	}
 
@@ -122,13 +123,7 @@ class CommonApi extends IrisApi {
 
 	initContent(ModelName) {
 		let dp = new CouchbirdDataProvider(this.db);
-		let storage_data_model = {
-			type: ModelName,
-			deco: 'BaseCollection',
-			params: 'id'
-		};
-
-		let Model = getModel.dataType(storage_data_model.type);
+		let Model = getModel.dataType(ModelName);
 		let snake_model = _.snakeCase(ModelName);
 		let storage_accessor = new LDAccessor(dp);
 
@@ -139,16 +134,9 @@ class CommonApi extends IrisApi {
 				.get);
 
 
-		let storage = AtomicFactory.create('BasicAsync', {
-			type: storage_data_model,
-			accessor: storage_accessor
-		});
 		//@NOTE: actually not content, but atomic
-		this.content[ModelName] = storage;
-		this.models = _.reduce(this.content, (acc, val, key) => {
-			acc[key] = getModel.dataType(val.model_decription.type);
-			return acc;
-		}, {});
+		this.content[ModelName] = storage_accessor;
+		this.models[ModelName] = Model;
 		return this;
 	}
 
@@ -160,10 +148,16 @@ class CommonApi extends IrisApi {
 		// console.log("GET", type, query);
 		return ((!type || !this.content[type]) && query.keys) ?
 			this.getEntryTypeless(query.keys) :
-			this.content[type].resolve(query)
+			this.content[type].get(query)
 			.then((res) => {
+				let Model = this.models[type];
 				// console.log("RES", res);
-				return res.serialize();
+				let transformed = _.reduce(res, (acc, entity, key) => {
+					acc[key] = Model.buildSerialized(entity);
+					return acc;
+				}, {});
+				// console.log("RES", transformed);
+				return transformed;
 			});
 	}
 
@@ -192,7 +186,7 @@ class CommonApi extends IrisApi {
 
 		return (tp.length > 1 && !type && !this.content[type] && !this.content[tp[0]]) ?
 			this.setEntryTypeless(content) :
-			this.content[type || tp[0]].save(content);
+			this.content[type || tp[0]].set(content);
 	}
 
 }

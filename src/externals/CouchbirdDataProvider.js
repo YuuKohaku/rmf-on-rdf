@@ -13,6 +13,7 @@ class CouchbirdDataProvider extends AbstractDataProvider {
 		query,
 		options
 	}) {
+		// console.log("CBLDP GET", keys, query, options);
 		if (query) {
 			switch (query.type) {
 			case 'n1ql':

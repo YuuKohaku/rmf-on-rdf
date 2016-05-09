@@ -56,7 +56,6 @@ class ContentAsync extends Content {
 			if (!path || !content) return false;
 
 			var atom = this.getAtom(path);
-			console.log(atom.Model);
 			return content instanceof atom.Model ? atom.save(content) : false;
 		}));
 	}

@@ -14,17 +14,19 @@ class ResolvedContentAsync extends ResolvedContent {
 
 	save() {
 		//@NOTE : bullshit below
-		var path = this.selector().traverse();
+		var path = this.selector()
+			.traverse();
 		var atom_data;
 		var result = [];
 
-		for(atom_data of path) {
+		for (atom_data of path) {
 			var {
 				atom_path: atom_path,
 				atom: atom
 			} = atom_data;
 
-			let status = this.parent.getAtom(atom_path).save(atom, true);
+			let status = this.parent.getAtom(atom_path)
+				.save(atom, true);
 
 			result.push(status);
 		}
@@ -34,7 +36,7 @@ class ResolvedContentAsync extends ResolvedContent {
 	observe(query) {
 		let atom_data;
 		let observed_atoms = [];
-		for(atom_data of this.path) {
+		for (atom_data of this.path) {
 			let {
 				atom_path: atom_path,
 				atom: atom
@@ -47,10 +49,12 @@ class ResolvedContentAsync extends ResolvedContent {
 
 			observed_atoms.push(Promise.resolve(observed_atom));
 		}
+
 		return Promise.all(observed_atoms)
 			.then((res) => {
 				_.map(res, ({
-					atom_path, atom
+					atom_path,
+					atom
 				}) => {
 					this.addAtom(atom_path, atom);
 				});
@@ -60,7 +64,7 @@ class ResolvedContentAsync extends ResolvedContent {
 	reserve(query) {
 		var atom_data;
 
-		for(atom_data of this.path) {
+		for (atom_data of this.path) {
 			var {
 				atom_path: atom_path,
 				atom: atom
@@ -69,7 +73,7 @@ class ResolvedContentAsync extends ResolvedContent {
 
 			var after_reserve = atom.reserve(params);
 
-			if(after_reserve) this.addAtom(atom_path, after_reserve);
+			if (after_reserve) this.addAtom(atom_path, after_reserve);
 		}
 
 		return this;
