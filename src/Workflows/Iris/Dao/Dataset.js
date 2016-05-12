@@ -1,3 +1,5 @@
+'use strict'
+
 let DataState = {
 	IDLE,
 	LOADING,
@@ -13,6 +15,7 @@ class Dataset {
 		this.accessor = accessor;
 		this.resolvers = {};
 		this._generatrix = {};
+		this._resolved = {};
 
 		this.state = DataState.IDLE;
 	}
@@ -34,10 +37,16 @@ class Dataset {
 
 	fire(build_params) {
 		_.map(this.resolvers, (resolver, rname) => {
-
+			this._resolved[rname] = resolver(build_params[rname], this._generatrix, this.resolvers);
 		});
+		return this._resolved;
 	}
 
+	flush() {
+		_.map(this._resolved, (data, rname) => {
+			_.unset(this._resolved[rname]);
+		});
+	}
 
 }
 
