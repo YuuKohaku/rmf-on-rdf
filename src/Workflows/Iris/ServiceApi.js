@@ -34,11 +34,26 @@ class ServiceApi extends CommonApi {
 	}
 
 	cacheServiceQuota(office, data) {
-		return super.setCache('service_quota', [office], data);
+		let q_res;
+		return super.setCache('service_quota', [office], data)
+			.then((res) => {
+				q_res = res;
+				return super.setCache('service_quota', [office, 'timestamp'], _.now());
+			})
+			.then(res => q_res);
 	}
 
 	getServiceQuota(office) {
 		return super.getCache('service_quota', [office]);
+	}
+
+	serviceQuotaExpired(office, allowed_interval) {
+		return super.getCache('service_quota', [office, 'timestamp'])
+			.then((res) => {
+				let ts = _.parseInt(res);
+				let expired = _.isNaN(ts) ? true : ((ts + allowed_interval) < _.now());
+				return Promise.resolve(expired);
+			});
 	}
 
 	lockQuota(office) {
