@@ -11,11 +11,7 @@ let DataState = {
 class Dataset {
 	constructor(accessor) {
 		this.accessor = accessor;
-		this.resolvers = {
-			'direct': () => {
-				return this._generatrix;
-			}
-		};
+		this.resolvers = {};
 		this._generatrix = {};
 
 		this.state = DataState.IDLE;
@@ -23,8 +19,6 @@ class Dataset {
 
 	// methods
 	setResolver(rname, rfn) {
-		if (!_.isFunction(rfn))
-			throw new Error('Resolver must be a function.');
 		this.resolvers[rname] = rfn;
 	}
 
@@ -39,7 +33,9 @@ class Dataset {
 	}
 
 	fire(build_params) {
+		_.map(this.resolvers, (resolver, rname) => {
 
+		});
 	}
 
 
