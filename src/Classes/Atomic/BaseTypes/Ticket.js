@@ -3,8 +3,8 @@
 let DatabaseFieldset = require("./DatabaseFieldset");
 
 class Ticket extends DatabaseFieldset {
-	static get fields(){
-		return  ['pending_tasks', 'source', "qa_answers", 'time_description', 'operator', 'alt_operator', 'history', 'service', "code", "destination", 'org_destination', "booking_date", "dedicated_date", "priority", "state", "user_info", "service_count", "called", "expiry"];
+	static get fields() {
+		return ['pending_tasks', 'source', "qa_answers", 'time_description', 'operator', 'alt_operator', 'history', 'service', "code", "destination", 'org_destination', "booking_date", "dedicated_date", "priority", "state", "user_info", "service_count", "called", "expiry"];
 	}
 
 	build(data) {
@@ -12,12 +12,12 @@ class Ticket extends DatabaseFieldset {
 		if (_.isString(this.content_map.service_count))
 			this.content_map.service_count = _.parseInt(this.content_map.service_count);
 	}
-	
-	static buildSerialized(data){
+
+	static buildSerialized(data) {
 		let serialized = super.buildSerialized(data);
 		if (_.isString(serialized.service_count))
 			serialized.service_count = _.parseInt(serialized.service_count);
-		return  serialized;
+		return serialized;
 	}
 
 	static get references() {
