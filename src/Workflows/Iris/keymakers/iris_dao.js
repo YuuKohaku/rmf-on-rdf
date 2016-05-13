@@ -1,14 +1,31 @@
 'use strict'
 
 module.exports = {
-	get: function ({
+	get: function({
 		query
 	}) {
 		// console.log("QQR", query);
-		if (!query)
+		if(!query)
 			return {};
-		let plan_id = _.isString(query.dedicated_date) ? dedicated_date : query.dedicated_date.format("YYYY-MM-DD");
+		// let plan_id = _.isString(query.dedicated_date) ? dedicated_date : query.dedicated_date.format("YYYY-MM-DD");
 		let chain = [];
+
+		let actors = query.actor_keys;
+		chain.push({
+			name: "actors",
+			in_keys: [actors]
+		});
+		//actor must have  a property 'provides'
+		chain.push({
+			name: "ops",
+			out_keys: (md) => {
+				// console.log(md);
+				let ops = _.map(_.filter(md[m_key].value.content, (mm) => (mm.role == "Operator" && mm.organization == query.organization)), "member");
+				let op_keys = _.uniq(_.flattenDeep(ops));
+				return(query.operator == '*') ? op_keys : _.intersection(op_keys, _.castArray(query.operator));
+			}
+		});
+
 		let m_key = query.operator_keys;
 		chain.push({
 			name: "mm",
@@ -20,14 +37,14 @@ module.exports = {
 				// console.log(md);
 				let ops = _.map(_.filter(md[m_key].value.content, (mm) => (mm.role == "Operator" && mm.organization == query.organization)), "member");
 				let op_keys = _.uniq(_.flattenDeep(ops));
-				return (query.operator == '*') ? op_keys : _.intersection(op_keys, _.castArray(query.operator));
+				return(query.operator == '*') ? op_keys : _.intersection(op_keys, _.castArray(query.operator));
 			}
 		});
 		chain.push({
 			name: "schedules",
 			out_keys: (ops) => {
 				let schedules = _.map(ops, (op) => {
-					if (!op) return [];
+					if(!op) return [];
 					let keys = op.value && op.value.has_schedule ? _.castArray(op.value.has_schedule.resource) : [];
 					return _.concat(keys, `${op.value["@id"]}-${query.organization}-plan--${plan_id}`);
 				});
@@ -38,7 +55,7 @@ module.exports = {
 			type: 'chain',
 			key_depth: 1,
 			query: chain,
-			final: function (res) {
+			final: function(res) {
 				// console.log("OPRESOURCFE", require('util')
 				// 	.inspect(res, {
 				// 		depth: null
@@ -51,7 +68,7 @@ module.exports = {
 					let sch = _.find(schedules, (sch, sch_id) => {
 						return !!~_.indexOf(_.castArray(val.has_schedule.resource), sch_id) && !!~_.indexOf(sch.has_day, day);
 					});
-					if (sch) {
+					if(sch) {
 						acc[key] = {};
 						let k = `${key}-${query.organization}-plan--${plan_id}`;
 						acc[key][k] = schedules[k];
@@ -70,7 +87,7 @@ module.exports = {
 			query: req
 		};
 	},
-	set: function (data) {
+	set: function(data) {
 		let access = [];
 		let opts = {};
 		_.map(_.values(data), (val) => {
@@ -79,7 +96,7 @@ module.exports = {
 				_.unset(val, 'key');
 				_.unset(val, 'cas');
 				access.push(node);
-				if (cas) {
+				if(cas) {
 					opts[node['@id']] = {
 						cas
 					};
