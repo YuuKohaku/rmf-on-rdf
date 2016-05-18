@@ -27,31 +27,11 @@ class WorkstationApi extends CommonApi {
 		return this;
 	}
 
-	cacheWorkstations() {
-		return this.db.N1ql.direct({
-				query: `SELECT  \`@id\` as id, \`@type\` as type, attached_to, short_label, occupied_by, device_type, provides, has_schedule, maintains FROM \`${this.db.bucket_name}\` WHERE attached_to IS NOT MISSING AND \`@type\` in ${JSON.stringify(_.keys(this.models))} ORDER BY type, id ASC`
-			})
-			.then((res) => {
-				// console.log("CACHE RES", res);
-				let data = _(res)
-					.groupBy('attached_to')
-					.mapValues((val, d_type) => _.map(val, v => {
-						v.occupied_by = _.compact(v.occupied_by);
-						v.active = !_.isEmpty(v.occupied_by);
-						return v;
-					}))
-					.value();
-				return Promise.props(_.mapValues(data, (org_data, org) => {
-					return this.setCache('workstations', [org], _.groupBy(org_data, 'device_type'));
-				}));
-			});
-	}
-
 	getWorkstationsCache(org) {
 		return super.getCache('workstations', [org]);
 	}
 
-	updateWorkstationsCache(organization) {
+	updateWorkstationsCache(organization, new_ws = []) {
 		let props = ['id', 'type', 'attached_to', 'short_label', 'occupied_by', 'device_type', 'provides', 'has_schedule', 'maintains'];
 		return Promise.map(_.castArray(organization), org => this.getWorkstationsCache(org))
 			.then(res => {
@@ -59,6 +39,7 @@ class WorkstationApi extends CommonApi {
 					.map(_.values)
 					.flattenDeep()
 					.map('id')
+					.concat(new_ws)
 					.uniq()
 					.compact()
 					.value();
