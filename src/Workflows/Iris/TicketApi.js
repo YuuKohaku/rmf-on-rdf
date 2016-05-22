@@ -22,12 +22,12 @@ class TicketApi extends CommonApi {
 		return super.setLookup('ticket', [code], ticket);
 	}
 
-	cacheServiceSlots(office, data) {
-		return super.setCache('service_slots', [office], data);
+	cacheServiceSlots(office, service, date, data, options) {
+		return super.setCache('service_slots', [office, service, date], data, options);
 	}
 
-	getServiceSlotsCache(office) {
-		return super.getCache('service_slots', [office]);
+	getServiceSlotsCache(office, service, date) {
+		return super.getCache('service_slots', [office, service, date]);
 	}
 
 

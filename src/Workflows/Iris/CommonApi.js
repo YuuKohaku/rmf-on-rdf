@@ -33,14 +33,14 @@ class CommonApi extends IrisApi {
 		return _.join(_.concat([type, _.snakeCase(name)], params), '_');
 	}
 
-	setCache(name, params = [], data) {
+	setCache(name, params = [], data, options = {}) {
 		let cname = this.getSystemName('cache', name, params);
 		return this.db.upsert(cname, {
 			"@id": cname,
 			"@category": _.camelCase(name),
 			"@type": "Cache",
 			"content": data
-		});
+		}, options);
 	}
 	getLookup(name, params = []) {
 		let cname = this.getSystemName('lookup', name, params);
@@ -60,7 +60,7 @@ class CommonApi extends IrisApi {
 
 	getGlobal(name, params = []) {
 		let cname = this.getSystemName('global', name, params);
- 		return this.db.get(cname)
+		return this.db.get(cname)
 			.then((res) => _.get(res, 'value.content', false));
 	}
 

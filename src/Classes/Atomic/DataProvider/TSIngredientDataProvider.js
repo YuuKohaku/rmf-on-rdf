@@ -13,6 +13,11 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 		return this;
 	}
 
+	setTransactor(fn_start, fn_end) {
+		this.transact = fn_start;
+		this.endTransact = fn_end;
+		return this;
+	}
 
 	get(params) {
 		// console.log("I_GET", require('util')
@@ -29,23 +34,37 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 		let service_id = selection.service;
 		let time_description = selection.time_description;
 
-		let time = process.hrtime();
-
-		return this.ingredient.resolve({
+		let resolve = [this.ingredient.getAtom(services_path), this.ingredient.getAtom(ops_path), this.ingredient.getAtom(plans_path)];
+		// return this.ingredient.resolve({
+		// 		query: selection
+		// 	})
+		return Promise.mapSeries(resolve, r => r.resolve({
 				query: selection
-			})
+			}))
 			.then((resolved) => {
-				// had to choose between this outrageous notation and additional * queries to db
-				// console.log("TSI", require('util')
-				// 	.inspect(resolved.content_map, {
-				// 		depth: null
-				// 	}));
-				let diff = process.hrtime(time);
-				// console.log("INGREDIENT RESOLVE IN %d msec", (diff[0]*1e9 + diff[1])/1000000);
-				time = process.hrtime();
-
+				// this.endTransact();
+				// let observed = {
+				// 	services: resolved.getAtom(services_path)
+				// 		.observe({
+				// 			operator_id: selection.operator,
+				// 			selection: {
+				// 				service_id: selection.service,
+				// 				selection: time_description
+				// 			}
+				// 		}),
+				// 	ops: resolved.getAtom(ops_path)
+				// 		.observe({
+				// 			operator_id: selection.operator,
+				// 			selection: time_description
+				// 		}),
+				// 	plans: resolved.getAtom(plans_path)
+				// 		.observe({
+				// 			operator_id: selection.operator,
+				// 			selection: time_description
+				// 		})
+				// };
 				let observed = {
-					services: resolved.getAtom(services_path)
+					services: resolved[0]
 						.observe({
 							operator_id: selection.operator,
 							selection: {
@@ -53,29 +72,24 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 								selection: time_description
 							}
 						}),
-					ops: resolved.getAtom(ops_path)
+					ops: resolved[1]
 						.observe({
 							operator_id: selection.operator,
 							selection: time_description
 						}),
-					plans: resolved.getAtom(plans_path)
+					plans: resolved[2]
 						.observe({
 							operator_id: selection.operator,
 							selection: time_description
 						})
 				};
-
-				diff = process.hrtime(time);
-				// console.log("INGREDIENT OBSERVE IN %d msec", (diff[0]*1e9 + diff[1])/1000000);
-				time = process.hrtime();
-
 				let services = observed.services.content;
 				let ops = observed.ops.content;
 				let plans = observed.plans.content;
-				// console.log("TSI II", require('util')
-				// 	.inspect(plans, {
-				// 		depth: null
-				// 	}));
+			// console.log("TSI II", require('util')
+			// 	.inspect(plans, {
+			// 		depth: null
+			// 	}));
 				return _.reduce(services, (acc, s_plans, op_id) => {
 					if (!(plans[op_id] && ops[op_id]))
 						return acc;
@@ -89,13 +103,7 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 					}, {});
 					return acc;
 				}, {});
-			})
-			.then((res) => {
-				let diff = process.hrtime(time);
-				// console.log("FIN IN %d msec", (diff[0]*1e9 + diff[1])/1000000);
-				return res;
 			});
-
 	}
 
 	free(params, value) {

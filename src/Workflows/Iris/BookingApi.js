@@ -18,6 +18,12 @@ class BookingApi extends IrisApi {
 		let ingredients = {
 			'ldplan': rs
 		};
+		this.transact = () => {
+			rs.transact();
+		};
+		this.endTransact = () => {
+			rs.endTransact();
+		};
 		this.ticket_api = new TicketApi();
 		let box_storage = this.ticket_api.initContent()
 			.getContent('Ticket');

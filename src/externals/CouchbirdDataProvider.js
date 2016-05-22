@@ -6,6 +6,21 @@ class CouchbirdDataProvider extends AbstractDataProvider {
 	constructor(bucket) {
 		super();
 		this._bucket = bucket;
+		this.cache = {};
+		this.record = false;
+	}
+
+	flush() {
+		this.cache = {};
+	}
+
+	transact() {
+		this.record = true;
+	}
+
+	endTransact() {
+		this.record = false;
+		this.flush();
 	}
 
 	get({
@@ -54,14 +69,18 @@ class CouchbirdDataProvider extends AbstractDataProvider {
 	}
 
 	process_chain(q, options) {
+		let transactional = {};
 		return Promise.reduce(q.query, (acc, query, index) => {
+				transactional[query.name] = !!query.transactional;
 				let keys = query.in_keys || query.out_keys(acc[index - 1].nodes);
-				return this._bucket.getNodes(keys, options)
+				let [nonex_keys, ex_keys] = _.partition(keys, k => _.isUndefined(this.cache[k]));
+				// console.log("CACHE", _.size(ex_keys), "\nUNDEFINED ", _.size(nonex_keys), "\n\n______________________________________________________________________");
+				return this._bucket.getNodes(nonex_keys, options)
 					.then((nodes) => {
 						// console.log("NODES", index, nodes);
 						acc[index] = {
 							name: query.name,
-							nodes
+							nodes: _.merge(_.pick(this.cache, ex_keys), nodes)
 						};
 						return acc;
 					});
@@ -69,9 +88,15 @@ class CouchbirdDataProvider extends AbstractDataProvider {
 			.then((res) => {
 				let out = _(res)
 					.keyBy('name')
-					.mapValues(t => _(t.nodes)
+					.mapValues((t, qname) => _(t.nodes)
 						.values()
-						.filter(v => !_.isUndefined(v))
+						.filter((v, k) => {
+							let t = _.get(v, 'value.@id');
+							if (t && this.record && transactional[qname]) {
+								this.cache[t] = v;
+							}
+							return !_.isUndefined(v)
+						})
 						.value())
 					.value();
 				return _.isFunction(q.final) ? q.final(out) : out;
@@ -103,6 +128,14 @@ class CouchbirdDataProvider extends AbstractDataProvider {
 	}
 
 	set(values, options) {
+		if (this.record) {
+			_.map(_.castArray(values.data), (node) => {
+				if (this.cache[node["@id"]])
+					this.cache[node["@id"]] = {
+						value: node
+					};
+			});
+		}
 		switch (values.type) {
 		case 'insert':
 			return this.insert(values, options);

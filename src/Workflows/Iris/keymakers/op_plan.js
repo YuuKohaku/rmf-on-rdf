@@ -11,10 +11,12 @@ module.exports = {
 		let m_key = query.operator_keys;
 		chain.push({
 			name: "mm",
+			transactional: true,
 			in_keys: [m_key]
 		});
 		chain.push({
 			name: "ops",
+			transactional: true,
 			out_keys: (md) => {
 				// console.log("MD", md);
 				let ops = _.map(_.filter(md[m_key].value.content, (mm) => (mm.role == "Operator" && mm.organization == query.organization)), "member");
@@ -24,6 +26,7 @@ module.exports = {
 		});
 		chain.push({
 			name: "schedules",
+			transactional: true,
 			out_keys: (ops) => {
 				// console.log("OPS", ops);
 				let schedules = _.map(ops, (op) => _.get(op, `value.has_schedule.${query.method}`, []));

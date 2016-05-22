@@ -34,6 +34,14 @@ class TSFactoryDataProvider {
 		return this;
 	}
 
+	startTransact() {
+		_.map(this.ingredients, i => i.transact());
+	}
+
+	endTransact() {
+		_.map(this.ingredients, i => i.endTransact());
+	}
+
 	getSource(sources, query) {
 		let picker = _.compact(_.castArray(query.operator || query.alt_operator));
 		// console.log("PICKER", picker, query);
@@ -350,6 +358,7 @@ class TSFactoryDataProvider {
 				//@FIXIT
 				let stats;
 				// console.log("STATS____________________________________________________________________________________________________________");
+				let time = process.hrtime();
 				if (params.quota_status) {
 					let services = _.uniq(_.flatMap(remains_new, _.keys));
 					// console.log("SERV", services, params.selection.ldplan.dedicated_date.format("YYYY-MM-DD"));
@@ -393,7 +402,9 @@ class TSFactoryDataProvider {
 					// 		depth: null
 					// 	}));
 				}
-
+				let diff = process.hrtime(time);
+				console.log('TSFDP QUOTA IN %d seconds', diff[0] + diff[1] / 1e9);
+				time = process.hrtime();
 
 				return Promise.props({
 					placed: this.storage_accessor.set(placed_new),

@@ -13,10 +13,12 @@ module.exports = {
 		let m_key = query.operator_keys;
 		chain.push({
 			name: "mm",
+			transactional: true,
 			in_keys: [m_key]
 		});
 		chain.push({
 			name: "ops",
+			transactional: true,
 			out_keys: (md) => {
 				// console.log(md);
 				let ops = _.map(_.filter(md[m_key].value.content, (mm) => (mm.role == "Operator" && mm.organization == query.organization)), "member");
@@ -36,11 +38,13 @@ module.exports = {
 		}
 		chain.push({
 			name: "services",
+			transactional: true,
 			in_keys: s_in_keys,
 			out_keys: s_out_keys
 		});
 		chain.push({
 			name: "schedules",
+			transactional: true,
 			out_keys: (servs) => {
 				let schedules = _.map(servs, `value.has_schedule.${query.method}`);
 				return _.uniq(_.flattenDeep(schedules));

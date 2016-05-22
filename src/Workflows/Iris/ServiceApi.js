@@ -33,9 +33,35 @@ class ServiceApi extends CommonApi {
 		return super.getRegistry('service');
 	}
 
-	cacheServiceQuota(office, data) {
+	updateServiceIds(data) {
+		return this.getGlobal("membership_description")
+			.then((res) => {
+				let keys = _.map(res, 'member');
+				return this.getEntryTypeless(_.uniq(keys));
+			})
+			.then(res => {
+				let data = _(res)
+					.values()
+					.compact()
+					.flatMap('provides')
+					.compact()
+					.uniq()
+					.value();
+				return super.setRegistry('service', data);
+			});
+	}
+
+	cacheServiceQuota(office, data, options = {}) {
 		let q_res;
-		return super.setCache('service_quota', [office], data)
+		let promises = [];
+		// console.log("CACHE QUOTA", data);
+		_.map(data, (srv_data, srv) => {
+			_.map(srv_data, (day_data, day) => {
+				// console.log("QUOTA PART", srv, day, day_data, options);
+				promises.push(super.setCache('service_quota', [office, srv, day], day_data, options))
+			});
+		});
+		return Promise.all(promises)
 			.then((res) => {
 				q_res = res;
 				return super.setCache('service_quota', [office, 'timestamp'], _.now());
@@ -43,8 +69,26 @@ class ServiceApi extends CommonApi {
 			.then(res => q_res);
 	}
 
-	getServiceQuota(office) {
-		return super.getCache('service_quota', [office]);
+	getServiceQuota(office, service = [], dates = []) {
+		let days = _.compact(_.castArray(dates));
+		let services = _.compact(_.castArray(service));
+
+		let promises = {};
+		_.map(services, (srv) => {
+			_.map(days, day => {
+				promises[`${srv}.${day}`] = super.getCache('service_quota', [office, srv, day]);
+			});
+		});
+
+		return Promise.props(promises)
+			.then((res) => {
+				// console.log("QUOTA GOT", res);
+				let quota = {};
+				_.map(res, (day_quota, index) => {
+					_.set(quota, index, day_quota || {});
+				});
+				return quota;
+			});
 	}
 
 	serviceQuotaExpired(office, allowed_interval) {

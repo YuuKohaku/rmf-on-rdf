@@ -86,6 +86,17 @@ class IrisBuilder {
 		let i_provider = new TSIngredientDataProvider();
 		i_provider
 			.setIngredient('ldplan', resource_source)
+			.setTransactor(() => {
+				// console.log("--------------------------------------------------------------------");
+				// console.log("START TRANSACT");
+				// console.log("--------------------------------------------------------------------");
+				dp.transact()
+			}, () => {
+				// console.log("--------------------------------------------------------------------");
+				// console.log("END TRANSACT");
+				// console.log("--------------------------------------------------------------------");
+				dp.endTransact()
+			})
 			.setSize(this.default_slot_size);
 
 		return i_provider;
@@ -151,7 +162,7 @@ class IrisBuilder {
 			});
 
 
-		let Model =  TypeModel;
+		let Model = TypeModel;
 
 		factory_provider
 			.addStorage(box_storage)
