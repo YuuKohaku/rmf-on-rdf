@@ -58,7 +58,7 @@ class ServiceApi extends CommonApi {
 		_.map(data, (srv_data, srv) => {
 			_.map(srv_data, (day_data, day) => {
 				// console.log("QUOTA PART", srv, day, day_data, options);
-				promises.push(super.setCache('service_quota', [office, srv, day], day_data, options))
+				promises.push(this.setCache('service_quota', [office, srv, day], day_data, options))
 			});
 		});
 		return Promise.all(promises)
@@ -76,7 +76,7 @@ class ServiceApi extends CommonApi {
 		let promises = {};
 		_.map(services, (srv) => {
 			_.map(days, day => {
-				promises[`${srv}.${day}`] = super.getCache('service_quota', [office, srv, day]);
+				promises[`${srv}.${day}`] = this.getCache('service_quota', [office, srv, day]);
 			});
 		});
 
