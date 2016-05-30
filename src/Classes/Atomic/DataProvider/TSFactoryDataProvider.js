@@ -381,16 +381,9 @@ class TSFactoryDataProvider {
 							let plan = _.get(op_plans, `${ service }`, false);
 							return plan ? acc + plan.getLength() : acc;
 						}, 0);
-						let reserved_per_service = _.reduce(services, (acc, s) => {
-							acc[s] = 0;
-							return acc;
-						}, {});
 						let reserved = _.reduce(all_placed, (acc, tick) => {
-							if (_.isArray(tick.time_description)) {
-								let delta = (tick.time_description[1] - tick.time_description[0]);
-								reserved_per_service[tick.service] += delta;
-								acc += delta;
-							}
+							if (_.isArray(tick.time_description))
+								acc += (tick.time_description[1] - tick.time_description[0]);
 							return acc;
 						}, 0);
 						let max_solid = {};
@@ -399,10 +392,9 @@ class TSFactoryDataProvider {
 							max_available,
 							available,
 							reserved,
-							reserved_per_service,
 							max_solid
 						};
-						_.set(acc, `${date}`, plan_stats);
+						_.set(acc, `${service}.${date}`, plan_stats);
 						return acc;
 					}, {});
 					// console.log("NEW", require('util')
