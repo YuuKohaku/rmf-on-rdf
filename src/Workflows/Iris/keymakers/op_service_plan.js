@@ -59,14 +59,17 @@ module.exports = {
 				let services = _.keyBy(_.map(res.services, "value"), "@id");
 				let ops = _.keyBy(_.map(res.ops, "value"), "@id");
 				let schedules = _.keyBy(_.map(res.schedules, "value"), "@id");
+				let method_key = `${query.method}_operation_time`;
 				let reduced = _.reduce(ops, (acc, val, key) => {
 					acc[key] = _.reduce(val.provides, (s_acc, s_id) => {
 						let sch = _.find(schedules, (sch, sch_id) => {
 							// console.log("SCH", sch_id, services[s_id], s_id, key);
 							return services[s_id] && !!~_.indexOf(_.castArray(services[s_id].has_schedule[query.method]), sch_id) && !!~_.indexOf(sch.has_day, day);
 						});
-						if (sch)
+						if (sch) {
+							sch.slot_size = services[s_id][method_key];
 							s_acc[s_id] = sch;
+						}
 						return s_acc;
 					}, {});
 					return acc;

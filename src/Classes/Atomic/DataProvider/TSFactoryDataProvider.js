@@ -365,13 +365,19 @@ class TSFactoryDataProvider {
 					stats = _.reduce(services, (acc, service) => {
 						let plans = _.map(remains_new, (op_plans, op_id) => {
 							let p = _.get(op_plans, `${service}`, false);
-							return p ? p.parent.intersection(p)
-								.defragment() : p;
+							if (p) {
+								let slot_size = p.slot_size;
+								let ret = p.parent.intersection(p)
+									.defragment();
+								ret.slot_size = slot_size;
+								return ret;
+							}
+							return p;
 						});
-						// console.log("PLAN", require('util')
-						// 	.inspect(plans, {
-						// 		depth: null
-						// 	}));
+					// console.log("PLAN", require('util')
+					// 	.inspect(plans, {
+					// 		depth: null
+					// 	}));
 						let available = {};
 						available[method] = _.reduce(plans, (acc, plan) => {
 							return plan ? (acc + plan.getLength()) : acc;
@@ -382,17 +388,30 @@ class TSFactoryDataProvider {
 							return plan ? acc + plan.getLength() : acc;
 						}, 0);
 						let reserved = _.reduce(all_placed, (acc, tick) => {
-							if (_.isArray(tick.time_description))
+							if (_.isArray(tick.time_description) && tick.service == service)
 								acc += (tick.time_description[1] - tick.time_description[0]);
 							return acc;
 						}, 0);
-						let max_solid = {};
-						max_solid[method] = _.max(_.map(plans, (plan) => plan ? plan.getMaxChunk() : 0)) || 0;
+						let available_slots = {};
+						available_slots[method] = 0;
+						available_slots[method] = _.reduce(plans, (acc, plan) => {
+								let slot_size = plan && plan.slot_size;
+								let add = plan && _.reduce(plan.content, (slots, chunk) => {
+									if (chunk.getState()
+										.haveState('a')) {
+										let len = chunk.getLength();
+										slots += _.floor(len / slot_size);
+									}
+									return slots;
+								}, 0) || 0;
+								return acc + add;
+							},
+							0);
 						let plan_stats = {
 							max_available,
 							available,
 							reserved,
-							max_solid
+							available_slots
 						};
 						_.set(acc, `${service}.${date}`, plan_stats);
 						return acc;

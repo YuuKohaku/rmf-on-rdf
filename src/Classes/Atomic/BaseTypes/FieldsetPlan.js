@@ -118,10 +118,6 @@ class FieldsetPlan extends Plan {
 		}, 0);
 	}
 
-	getMaxChunk(state) {
-		return _.max(_.map(this.content, (chunk) => chunk.getState()
-			.haveState(state || 'a') ? chunk.getLength() : 0));
-	}
 }
 
 module.exports = FieldsetPlan;

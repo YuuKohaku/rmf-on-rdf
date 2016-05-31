@@ -86,10 +86,10 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 				let services = observed.services.content;
 				let ops = observed.ops.content;
 				let plans = observed.plans.content;
-			// console.log("TSI II", require('util')
-			// 	.inspect(plans, {
-			// 		depth: null
-			// 	}));
+				// console.log("TSI II", require('util')
+				// 	.inspect(plans, {
+				// 		depth: null
+				// 	}));
 				return _.reduce(services, (acc, s_plans, op_id) => {
 					if (!(plans[op_id] && ops[op_id]))
 						return acc;
@@ -98,7 +98,7 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 					s_ids = _.castArray(s_ids);
 					acc[op_id] = _.reduce(s_ids, (op_services, s_id) => {
 						let plan = op_plan.intersection(s_plans.content[s_id]);
-						op_services[s_id] = params.split ? plan.split(size, count) : plan;
+						op_services[s_id] = plan;
 						return op_services;
 					}, {});
 					return acc;
