@@ -102,26 +102,15 @@ class ServiceApi extends CommonApi {
 
 	lockQuota(office) {
 		let name = super.getSystemName('cache', 'service_quota', [office, 'flag']);
-		return this.db.get(name)
-			.then(cnt => {
-				if (cnt && (cnt.value > 0))
-					return Promise.reject(new Error("Locked"));
-				return this.db.counter(name, 1, {
-					initial: 1,
-					expiry: 60
-				});
-			});
+		return this.db.counter(name, 1, {
+				initial: 1,
+				expiry: 60
+			})
+			.then(cnt => (cnt.value == 1));
 	}
 	unlockQuota(office) {
 		let name = super.getSystemName('cache', 'service_quota', [office, 'flag']);
-		return this.db.get(name)
-			.then(cnt => {
-				if (cnt && (cnt.value < 1))
-					return true;
-				return this.db.counter(name, -1, {
-					initial: 0
-				});
-			});
+		return this.db.remove(name);
 	}
 	getServiceTree(query) {
 		let groups = {};

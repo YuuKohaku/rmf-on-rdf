@@ -25,8 +25,13 @@ class CommonApi extends IrisApi {
 
 	getCache(name, params = []) {
 		let cname = this.getSystemName('cache', name, params);
-		return this.db.get(cname)
-			.then((res) => _.get(res, 'value.content', {}));
+		let cached = inmemory_cache.get(cname);
+		return cached && Promise.resolve(cached) || this.db.get(cname)
+			.then((res) => {
+				let r = _.get(res, 'value.content', false);
+				r && inmemory_cache.set(cname, r);
+				return r || {};
+			});
 	}
 
 	getSystemName(type, name, params = []) {
@@ -35,6 +40,7 @@ class CommonApi extends IrisApi {
 
 	setCache(name, params = [], data, options = {}) {
 		let cname = this.getSystemName('cache', name, params);
+		inmemory_cache.set(cname, data);
 		return this.db.upsert(cname, {
 			"@id": cname,
 			"@category": _.camelCase(name),
@@ -44,12 +50,18 @@ class CommonApi extends IrisApi {
 	}
 	getLookup(name, params = []) {
 		let cname = this.getSystemName('lookup', name, params);
-		return this.db.get(cname)
-			.then((res) => _.get(res, 'value.content', false));
+		let cached = inmemory_cache.get(cname);
+		return cached && Promise.resolve(cached) || this.db.get(cname)
+			.then((res) => {
+				let r = _.get(res, 'value.content', false);
+				r && inmemory_cache.set(cname, r);
+				return r;
+			});
 	}
 
 	setLookup(name, params = [], data) {
 		let cname = this.getSystemName('lookup', name, params);
+		inmemory_cache.set(cname, data);
 		return this.db.upsert(cname, {
 			"@id": cname,
 			"@category": _.camelCase(name),
@@ -60,12 +72,18 @@ class CommonApi extends IrisApi {
 
 	getGlobal(name, params = []) {
 		let cname = this.getSystemName('global', name, params);
-		return this.db.get(cname)
-			.then((res) => _.get(res, 'value.content', false));
+		let cached = inmemory_cache.get(cname);
+		return cached && Promise.resolve(cached) || this.db.get(cname)
+			.then((res) => {
+				let r = _.get(res, 'value.content', false);
+				r && inmemory_cache.set(cname, r);
+				return r;
+			});
 	}
 
 	setGlobal(name, params = [], data) {
 		let cname = this.getSystemName('global', name, params);
+		inmemory_cache.set(cname, data);
 		return this.db.upsert(cname, {
 			"@id": cname,
 			"@category": _.camelCase(name),
@@ -76,12 +94,18 @@ class CommonApi extends IrisApi {
 
 	getRegistry(name, params = []) {
 		let cname = this.getSystemName('registry', name, params);
-		return this.db.get(cname)
-			.then((res) => _.get(res, 'value.content', []));
+		let cached = inmemory_cache.get(cname);
+		return cached && Promise.resolve(cached) || this.db.get(cname)
+			.then((res) => {
+				let r = _.get(res, 'value.content', false);
+				r && inmemory_cache.set(cname, r);
+				return r || [];
+			});
 	}
 
 	setRegistry(name, params = [], data) {
 		let cname = this.getSystemName('registry', name, params);
+		inmemory_cache.set(cname, data);
 		return this.db.upsert(cname, {
 			"@id": cname,
 			"@content_type": _.upperFirst(_.camelCase(name)),
