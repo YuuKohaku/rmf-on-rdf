@@ -106,10 +106,14 @@ class ServiceApi extends CommonApi {
 				initial: 1,
 				expiry: 60
 			})
-			.then(cnt => (cnt.value == 1));
+			.then(cnt => {
+				global.logger && logger.info("Set warmup flag %s to %s", name, cnt.value);
+				return (cnt.value == 1);
+			});
 	}
 	unlockQuota(office) {
 		let name = super.getSystemName('cache', 'service_quota', [office, 'flag']);
+		global.logger && logger.info("Removing warmup flag %s", name);
 		return this.db.remove(name);
 	}
 	getServiceTree(query) {
