@@ -99,7 +99,6 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 					acc[op_id] = _.reduce(s_ids, (op_services, s_id) => {
 						let plan = op_plan.intersection(s_plans.content[s_id]);
 						op_services[s_id] = plan;
-						plan.slot_size = _.get(s_plans.content[s_id], 'parent.template.slot_size');
 						return op_services;
 					}, {});
 					return acc;
