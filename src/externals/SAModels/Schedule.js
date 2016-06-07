@@ -20,6 +20,7 @@ class Schedule extends DatabaseFieldset {
 	build(data) {
 		super.build(data);
 		this.content_map.has_time_description = _.castArray(this.content_map.has_time_description);
+		data.slot_size && (this.slot_size = data.slot_size);
 	}
 }
 

@@ -13,12 +13,6 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 		return this;
 	}
 
-	setTransactor(fn_start, fn_end) {
-		this.transact = fn_start;
-		this.endTransact = fn_end;
-		return this;
-	}
-
 	get(params) {
 		// console.log("I_GET", require('util')
 		// 	.inspect(params, {
@@ -90,7 +84,7 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 				// 	.inspect(plans, {
 				// 		depth: null
 				// 	}));
-				return _.reduce(services, (acc, s_plans, op_id) => {
+				let resu = _.reduce(services, (acc, s_plans, op_id) => {
 					if (!(plans[op_id] && ops[op_id]))
 						return acc;
 					let op_plan = plans[op_id].intersection(ops[op_id]);
@@ -103,6 +97,14 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 					}, {});
 					return acc;
 				}, {});
+
+				if (_.isEmpty(resu)) {
+					console.log("______________________________________________________", require("util")
+						.inspect(ops, {
+							depth: null
+						}));
+				}
+				return resu;
 			});
 	}
 

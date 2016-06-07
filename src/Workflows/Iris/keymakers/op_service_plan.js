@@ -21,7 +21,7 @@ module.exports = {
 			transactional: true,
 			out_keys: (md) => {
 				// console.log(md);
-				let ops = _.map(_.filter(md[m_key].value.content, (mm) => (mm.role == "Operator" && mm.organization == query.organization)), "member");
+				let ops = _.map(_.filter(_.get(md[m_key], 'value.content', false) || md[m_key], (mm) => (mm.role == "Operator" && mm.organization == query.organization)), "member");
 				let op_keys = _.uniq(_.flattenDeep(ops));
 				return _.concat(((query.operator == '*') ? op_keys : _.intersection(op_keys, _.castArray(query.operator))), query.service_keys);
 			}
@@ -31,7 +31,7 @@ module.exports = {
 				let mask = ops[query.service_keys] || [];
 				_.unset(ops, query.service_keys);
 				// console.log("SERVICES", _.intersection(_.flatMap(ops, "value.provides"), _.get(mask, "value.content", [])));
-				return _.intersection(_.flatMap(ops, "value.provides"), _.get(mask, "value.content", []));
+				return _.intersection(_.flatMap(ops, "value.provides"), _.get(mask, "value.content", false) || mask || []);
 			};
 		} else {
 			s_in_keys = _.castArray(query.service);
@@ -59,7 +59,6 @@ module.exports = {
 				let services = _.keyBy(_.map(res.services, "value"), "@id");
 				let ops = _.keyBy(_.map(res.ops, "value"), "@id");
 				let schedules = _.keyBy(_.map(res.schedules, "value"), "@id");
-				let method_key = `${query.method}_operation_time`;
 				let reduced = _.reduce(ops, (acc, val, key) => {
 					acc[key] = _.reduce(val.provides, (s_acc, s_id) => {
 						let sch = _.find(schedules, (sch, sch_id) => {
@@ -67,7 +66,6 @@ module.exports = {
 							return services[s_id] && !!~_.indexOf(_.castArray(services[s_id].has_schedule[query.method]), sch_id) && !!~_.indexOf(sch.has_day, day);
 						});
 						if (sch) {
-							sch.slot_size = services[s_id][method_key];
 							s_acc[s_id] = sch;
 						}
 						return s_acc;

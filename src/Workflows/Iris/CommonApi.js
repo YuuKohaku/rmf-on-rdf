@@ -23,13 +23,13 @@ class CommonApi extends IrisApi {
 		this.models = {};
 	}
 
-	getCache(name, params = []) {
+	getCache(name, params = [], options = {}) {
 		let cname = this.getSystemName('cache', name, params);
 		let cached = inmemory_cache.get(cname);
 		return cached && Promise.resolve(cached) || this.db.get(cname)
 			.then((res) => {
 				let r = _.get(res, 'value.content', false);
-				r && inmemory_cache.set(cname, r);
+				r && !options.no_memcache && inmemory_cache.set(cname, r);
 				return r || {};
 			});
 	}
@@ -40,7 +40,8 @@ class CommonApi extends IrisApi {
 
 	setCache(name, params = [], data, options = {}) {
 		let cname = this.getSystemName('cache', name, params);
-		inmemory_cache.set(cname, data);
+
+		!options.no_memcache && inmemory_cache.set(cname, data);
 		return this.db.upsert(cname, {
 			"@id": cname,
 			"@category": _.camelCase(name),

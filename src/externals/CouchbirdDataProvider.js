@@ -6,21 +6,6 @@ class CouchbirdDataProvider extends AbstractDataProvider {
 	constructor(bucket) {
 		super();
 		this._bucket = bucket;
-		this.cache = {};
-		this.record = false;
-	}
-
-	flush() {
-		this.cache = {};
-	}
-
-	transact() {
-		this.record = true;
-	}
-
-	endTransact() {
-		this.record = false;
-		this.flush();
 	}
 
 	get({
@@ -73,14 +58,15 @@ class CouchbirdDataProvider extends AbstractDataProvider {
 		return Promise.reduce(q.query, (acc, query, index) => {
 				transactional[query.name] = !!query.transactional;
 				let keys = query.in_keys || query.out_keys(acc[index - 1].nodes);
-				let [nonex_keys, ex_keys] = _.partition(keys, k => _.isUndefined(this.cache[k]));
+				let cached = inmemory_cache.mget(keys);
+				let [nonex_keys, ex_keys] = _.partition(keys, k => _.isUndefined(cached[k]));
 				// console.log("CACHE", _.size(ex_keys), "\nUNDEFINED ", _.size(nonex_keys), "\n\n______________________________________________________________________");
 				return this._bucket.getNodes(nonex_keys, options)
 					.then((nodes) => {
 						// console.log("NODES", index, nodes);
 						acc[index] = {
 							name: query.name,
-							nodes: _.merge(_.pick(this.cache, ex_keys), nodes)
+							nodes: _.merge(cached, nodes)
 						};
 						return acc;
 					});
@@ -92,10 +78,10 @@ class CouchbirdDataProvider extends AbstractDataProvider {
 						.values()
 						.filter((v, k) => {
 							let t = _.get(v, 'value.@id');
-							if (t && this.record && transactional[qname]) {
-								this.cache[t] = v;
+							if (t && transactional[qname]) {
+								inmemory_cache.set(t, v);
 							}
-							return !_.isUndefined(v)
+							return !_.isUndefined(v);
 						})
 						.value())
 					.value();

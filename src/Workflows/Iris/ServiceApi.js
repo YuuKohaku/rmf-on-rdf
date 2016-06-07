@@ -64,7 +64,9 @@ class ServiceApi extends CommonApi {
 		return Promise.all(promises)
 			.then((res) => {
 				q_res = res;
-				return super.setCache('service_quota', [office, 'timestamp'], _.now());
+				return super.setCache('service_quota', [office, 'timestamp'], _.now(), {
+					no_memcache: true
+				});
 			})
 			.then(res => q_res);
 	}
@@ -92,7 +94,9 @@ class ServiceApi extends CommonApi {
 	}
 
 	serviceQuotaExpired(office, allowed_interval) {
-		return super.getCache('service_quota', [office, 'timestamp'])
+		return super.getCache('service_quota', [office, 'timestamp'], {
+				no_memcache: true
+			})
 			.then((res) => {
 				let ts = _.parseInt(res);
 				let expired = _.isNaN(ts) ? true : ((ts + allowed_interval) < _.now());
@@ -100,11 +104,11 @@ class ServiceApi extends CommonApi {
 			});
 	}
 
-	lockQuota(office) {
+	lockQuota(office, expiry) {
 		let name = super.getSystemName('cache', 'service_quota', [office, 'flag']);
 		return this.db.counter(name, 1, {
 				initial: 1,
-				expiry: 60
+				expiry
 			})
 			.then(cnt => {
 				global.logger && logger.info("Set warmup flag %s to %s", name, cnt.value);

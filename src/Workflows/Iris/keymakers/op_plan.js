@@ -19,7 +19,7 @@ module.exports = {
 			transactional: true,
 			out_keys: (md) => {
 				// console.log("MD", md);
-				let ops = _.map(_.filter(md[m_key].value.content, (mm) => (mm.role == "Operator" && mm.organization == query.organization)), "member");
+				let ops = _.map(_.filter(_.get(md[m_key], 'value.content', false) || md[m_key], (mm) => (mm.role == "Operator" && mm.organization == query.organization)), "member");
 				let op_keys = _.uniq(_.flattenDeep(ops));
 				return (query.operator == '*') ? op_keys : _.intersection(op_keys, _.castArray(query.operator));
 			}

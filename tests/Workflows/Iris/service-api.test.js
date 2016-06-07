@@ -7,47 +7,45 @@ let IrisWorkflow = require(_base + '/build/Workflows/Iris');
 let gpc = require('generate-pincode');
 
 
-// describe('Workflow: IRIS Service', () => {
-describe.only('Workflow: RD IRIS Service', () => {
-	let test_data = require(_base + "/tests/data/data_expanded_parsed.json");
-	let test_cfg = require(_base + "/tests/data/config.json");
-	let test_fields = require(_base + "/tests/data/terminal_fields.json");
-	let keymakers = require(_base + "/build/Workflows/Iris/keymakers");
-	let cfg = {
-		"couchbird": {
-			"server_ip": "192.168.1.42",
-			"n1ql": "192.168.1.42:8093"
-		},
-		"buckets": {
-			"main": "rdf",
-			"auth": "ss",
-			"history": "rdf"
-		}
-	};
+describe('Workflow: IRIS Service', () => {
+			// describe.only('Workflow: RD IRIS Service', () => {
+			let test_data = require(_base + "/tests/data/data_expanded_parsed.json");
+			let test_cfg = require(_base + "/tests/data/config.json");
+			let test_fields = require(_base + "/tests/data/terminal_fields.json");
+			let keymakers = require(_base + "/build/Workflows/Iris/keymakers");
+			let cfg = {
+				"couchbird": {
+					"server_ip": "192.168.1.42",
+					"n1ql": "192.168.1.42:8093"
+				},
+				"buckets": {
+					"main": "rdf",
+					"auth": "ss",
+					"history": "rdf"
+				}
+			};
 
 
-	let iris = null;
-	let db = null;
-	let bucket = null;
+			let iris = null;
+			let db = null;
+			let bucket = null;
 
-	before(() => {
-		db = new RDFcb(cfg.couchbird);
-		bucket = db.bucket(cfg.buckets.main);
-		bucket.N1QL(Couchbird.N1qlQuery.fromString("CREATE PRIMARY INDEX ON " + cfg.buckets.main + ";"))
-		bucket.upsertNodes(test_data);
-		// bucket.upsert('user_info_fields', test_fields);
-		// bucket.upsert('iris_config_service_groups', test_cfg);
+			before(() => {
+				db = new RDFcb(cfg.couchbird);
+				bucket = db.bucket(cfg.buckets.main);
+				bucket.N1QL(Couchbird.N1qlQuery.fromString("CREATE PRIMARY INDEX ON " + cfg.buckets.main + ";"))
+				bucket.upsertNodes(test_data);
+				// bucket.upsert('user_info_fields', test_fields);
+				// bucket.upsert('iris_config_service_groups', test_cfg);
 
-		IrisWorkflow.initializer(cfg.buckets.main);
-		let ServiceApi = IrisWorkflow.ServiceApi;
-		iris = new ServiceApi();
-		iris.initContent();
-		//@NOTE: building factory
-		//@NOTE: prepare variables
+				IrisWorkflow.initializer(cfg.buckets.main);
+				let ServiceApi = IrisWorkflow.ServiceApi;
+				iris = new ServiceApi();
+				iris.initContent();
+				//@NOTE: building factory
+				//@NOTE: prepare variables
 
-	});
-
-
+			});
 	describe('get services', function () {
 		this.timeout(10000);
 		it('get service group', (done) => {

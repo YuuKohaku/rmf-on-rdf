@@ -34,14 +34,6 @@ class TSFactoryDataProvider {
 		return this;
 	}
 
-	startTransact() {
-		_.map(this.ingredients, i => i.transact());
-	}
-
-	endTransact() {
-		_.map(this.ingredients, i => i.endTransact());
-	}
-
 	getSource(sources, query) {
 		let picker = _.compact(_.castArray(query.operator || query.alt_operator));
 		// console.log("PICKER", picker, query);
@@ -340,6 +332,7 @@ class TSFactoryDataProvider {
 					return _.isArray(tick.time_description) && (tick.time_description[0] < td[0] || tick.time_description[1] > td[1]);
 				});
 				// console.log("NEWTICKS", new_tickets, lost_old);
+
 				let old_placed = _.isEmpty(lost_old);
 				if (!_.isEmpty(lost)) {
 					//		console.log("-------------------------------------------------------------------------------------------------------");
@@ -361,23 +354,18 @@ class TSFactoryDataProvider {
 				let time = process.hrtime();
 				if (params.quota_status) {
 					let services = _.uniq(_.flatMap(remains_new, _.keys));
-					// console.log("SERV", services, params.selection.ldplan.dedicated_date.format("YYYY-MM-DD"));
+					// console.log("SERV", _.size(services), params.selection.ldplan.dedicated_date.format("YYYY-MM-DD"));
+
 					stats = _.reduce(services, (acc, service) => {
 						let plans = _.map(remains_new, (op_plans, op_id) => {
 							let p = _.get(op_plans, `${service}`, false);
-							if (p) {
-								let slot_size = p.slot_size;
-								let ret = p.parent.intersection(p)
-									.defragment();
-								ret.slot_size = slot_size;
-								return ret;
-							}
-							return p;
+							return p ? p.parent.intersection(p)
+								.defragment() : p;
 						});
-					// console.log("PLAN", require('util')
-					// 	.inspect(plans, {
-					// 		depth: null
-					// 	}));
+						// console.log("PLAN", require('util')
+						// 	.inspect(plans, {
+						// 		depth: null
+						// 	}));
 						let available = {};
 						available[method] = _.reduce(plans, (acc, plan) => {
 							return plan ? (acc + plan.getLength()) : acc;
@@ -392,26 +380,17 @@ class TSFactoryDataProvider {
 								acc += (tick.time_description[1] - tick.time_description[0]);
 							return acc;
 						}, 0);
-						let available_slots = {};
-						available_slots[method] = 0;
-						available_slots[method] = _.reduce(plans, (acc, plan) => {
-								let slot_size = plan && plan.slot_size;
-								let add = plan && _.reduce(plan.content, (slots, chunk) => {
-									if (chunk.getState()
-										.haveState('a')) {
-										let len = chunk.getLength();
-										slots += _.floor(len / slot_size);
-									}
-									return slots;
-								}, 0) || 0;
-								return acc + add;
-							},
-							0);
+						let max_solid = {};
+						max_solid[method] = _.max(_.map(plans, (plan) => plan ? _.max(_.map(plan.content, chunk => {
+							if (chunk.getState()
+								.haveState('a')) return chunk.getLength();
+							else return 0;
+						})) : 0)) || 0;
 						let plan_stats = {
 							max_available,
 							available,
 							reserved,
-							available_slots
+							max_solid
 						};
 						_.set(acc, `${service}.${date}`, plan_stats);
 						return acc;
@@ -422,7 +401,7 @@ class TSFactoryDataProvider {
 					// 	}));
 				}
 				let diff = process.hrtime(time);
-				console.log('TSFDP QUOTA IN %d seconds', diff[0] + diff[1] / 1e9);
+				console.log('TSFDP QUOTA IN %d seconds', diff[0] + diff[1] / 1e9, method, params.quota_status);
 				time = process.hrtime();
 
 				return Promise.props({
