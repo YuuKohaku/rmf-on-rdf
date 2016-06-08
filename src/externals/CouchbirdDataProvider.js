@@ -58,8 +58,8 @@ class CouchbirdDataProvider extends AbstractDataProvider {
 		return Promise.reduce(q.query, (acc, query, index) => {
 				transactional[query.name] = !!query.transactional;
 				let keys = query.in_keys || query.out_keys(acc[index - 1].nodes);
-				let cached = inmemory_cache.mget(keys);
-				let [nonex_keys, ex_keys] = _.partition(keys, k => _.isUndefined(cached[k]));
+				let cached = transactional[query.name] && inmemory_cache.mget(keys) || {};
+				let [nonex_keys, ex_keys] = _.partition(keys, k => (_.isUndefined(cached[k]) || !!cached[k].error));
 				// console.log("CACHE", _.size(ex_keys), "\nUNDEFINED ", _.size(nonex_keys), "\n\n______________________________________________________________________");
 				return this._bucket.getNodes(nonex_keys, options)
 					.then((nodes) => {

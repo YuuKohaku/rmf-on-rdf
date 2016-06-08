@@ -13,7 +13,6 @@ module.exports = {
 		let m_key = query.operator_keys;
 		chain.push({
 			name: "mm",
-			transactional: true,
 			in_keys: [m_key]
 		});
 		chain.push({
@@ -21,7 +20,8 @@ module.exports = {
 			transactional: true,
 			out_keys: (md) => {
 				// console.log(md);
-				let ops = _.map(_.filter(_.get(md[m_key], 'value.content', false) || md[m_key], (mm) => (mm.role == "Operator" && mm.organization == query.organization)), "member");
+				let members = _.get(md[m_key], 'value.content', false) || md[m_key];
+				let ops = _.map(_.filter(members, (mm) => (mm.role == "Operator" && mm.organization == query.organization)), "member");
 				let op_keys = _.uniq(_.flattenDeep(ops));
 				return _.concat(((query.operator == '*') ? op_keys : _.intersection(op_keys, _.castArray(query.operator))), query.service_keys);
 			}
