@@ -52,8 +52,8 @@ class TicketApi extends CommonApi {
 		return _.orderBy(tickets, [(tick) => {
 			return _.sum(_.map(tick.priority, 'value'));
 		}, (tick) => {
-			return (new Date(tick.booking_date))
-				.getTime();
+			return moment(tick.booking_date)
+				.unix();
 		}], ['desc', 'asc'])
 	}
 }
