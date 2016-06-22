@@ -141,7 +141,7 @@ class CommonApi extends IrisApi {
 				return this.db.upsertNodes(data_serialized);
 			})
 			.catch((err) => {
-				console.log("TYPELESS GET ERR", err.stack);
+				console.log("TYPELESS SET ERR", err.stack);
 				return false;
 			});
 	}
