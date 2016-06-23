@@ -120,6 +120,8 @@ class CommonApi extends IrisApi {
 			.then((res) => {
 				// console.log("TYPELESS RES", res, keys);
 				return _.mapValues(res, (val, key) => {
+					if (!val)
+						return val;
 					let Model = this.models[val.value["@type"]];
 					return Model.buildSerialized(val);
 				})
