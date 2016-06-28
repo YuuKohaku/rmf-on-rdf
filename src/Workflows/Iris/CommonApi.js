@@ -137,9 +137,10 @@ class CommonApi extends IrisApi {
 			.then(() => {
 				let data_serialized = _.map(_.castArray(data), (val, key) => {
 					let Model = this.models[val.type];
-					return Model.buildDbData(val);
+					let entity = Model.buildDbData(val);
+					_.unset(entity, 'cas');
+					return entity;
 				});
-
 				return this.db.upsertNodes(data_serialized);
 			})
 			.catch((err) => {
