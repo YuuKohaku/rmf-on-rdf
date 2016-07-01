@@ -36,7 +36,7 @@ class TSFactoryDataProvider {
 
 	getSource(sources, query) {
 		let picker = _.compact(_.castArray(query.operator || query.alt_operator));
-		// console.log("PICKER", picker, query);
+		console.log("PICKER", picker);
 		let cnt = query.service_count > 0 ? query.service_count : 1;
 		let ops = _.reduce(_.pick(sources, picker), (acc, op_s, op_id) => {
 			if (op_s[query.service]) {
@@ -210,12 +210,14 @@ class TSFactoryDataProvider {
 					time_description
 				}) => {
 					for (let i = 0; i < params.count; i++) {
-						ticket_data.push({
+						let t = {
 							time_description,
 							dedicated_date: params.selection.ldplan.dedicated_date,
 							service: s_id,
 							service_count: _.parseInt(params.selection.ldplan.service_count)
-						});
+						};
+						_.merge(t, params.ticket_properties);
+						ticket_data.push(t);
 					}
 				});
 

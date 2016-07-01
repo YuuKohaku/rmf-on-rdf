@@ -144,6 +144,7 @@ class IrisBuilder {
 						}
 					},
 					services: query.services,
+					ticket_properties: query.ticket_properties,
 					box_id: '*',
 					count: query.count,
 					existing_only: !!query.existing_only
