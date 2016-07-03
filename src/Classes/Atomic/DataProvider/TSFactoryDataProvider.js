@@ -265,10 +265,7 @@ class TSFactoryDataProvider {
 					return false;
 				let tick = to_place;
 				tick.source = saved.ldplan[tick.id];
-				if (!_.isArray(to_place.time_description)) {
-					_.unset(tick, 'operator');
-					_.unset(tick, 'destination');
-				}
+
 				// console.log("TICK SV", tick, saved);
 				return this.storage_accessor.set(tick)
 					.catch((err) => {
@@ -299,6 +296,7 @@ class TSFactoryDataProvider {
 							return srcValue;
 						}
 					});
+					console.log(to_free, to_reserve);
 					let placing = _.reduce(to_reserve, (acc, tick, key) => {
 						acc[key] = this.saveTicket(params, tick, to_free[key] || {});
 						return acc;
