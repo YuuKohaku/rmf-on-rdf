@@ -32,7 +32,7 @@ class WorkstationApi extends CommonApi {
 	}
 
 	updateWorkstationsCache(organization, new_ws = []) {
-		let props = ['id', 'type', 'attached_to', 'short_label', 'occupied_by', 'device_type', 'provides', 'has_schedule', 'maintains'];
+		let props = ['id', 'type', 'attached_to', 'short_label', 'occupied_by', 'device_type', 'provides', 'has_schedule', 'maintains', 'state'];
 		return Promise.map(_.castArray(organization), org => this.getWorkstationsCache(org))
 			.then(res => {
 				let keys = _(res)
@@ -52,7 +52,8 @@ class WorkstationApi extends CommonApi {
 					.map(v => _.pick(v, props))
 					.map(v => {
 						v.occupied_by = _.compact(v.occupied_by);
-						v.active = !_.isEmpty(v.occupied_by);
+						if (!v.state)
+							v.state = _.isEmpty(v.occupied_by) ? 'inactive' : 'active';
 						return v;
 					})
 					.groupBy('attached_to')
