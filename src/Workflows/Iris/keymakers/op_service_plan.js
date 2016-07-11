@@ -10,21 +10,12 @@ module.exports = {
 		let s_in_keys;
 		let s_out_keys;
 		let chain = [];
-		let m_key = query.operator_keys;
-		chain.push({
-			name: "mm",
-			in_keys: [m_key]
-		});
+		let op_keys = query.actor == '*' ? query.actor_keys : _.intersection(query.actor, query.actor_keys);
+		op_keys = _.concat(op_keys, query.service_keys)
 		chain.push({
 			name: "ops",
 			transactional: true,
-			out_keys: (md) => {
-				// console.log(md);
-				let members = _.get(md[m_key], 'value.content', false) || md[m_key];
-				let ops = _.map(_.filter(members, (mm) => (mm.role == "Operator" && mm.organization == query.organization)), "member");
-				let op_keys = _.uniq(_.flattenDeep(ops));
-				return _.concat(((query.operator == '*') ? op_keys : _.intersection(op_keys, _.castArray(query.operator))), query.service_keys);
-			}
+			in_keys: op_keys
 		});
 		if (query.service == '*') {
 			s_out_keys = (ops) => {
@@ -63,9 +54,13 @@ module.exports = {
 					acc[key] = _.reduce(val.provides, (s_acc, s_id) => {
 						let sch = _.find(schedules, (sch, sch_id) => {
 							// console.log("SCH", sch_id, services[s_id], s_id, key);
-							return services[s_id] && !!~_.indexOf(_.castArray(services[s_id].has_schedule[query.method]), sch_id) && !!~_.indexOf(sch.has_day, day);
+							return services[s_id] && !!~_.indexOf(_.castArray(_.get(services, [s_id, 'has_schedule', query.method], [])), sch_id) && !!~_.indexOf(sch.has_day, day);
 						});
 						if (sch) {
+							sch = _.cloneDeep(sch);
+							sch._mark = {
+								service: s_id
+							};
 							s_acc[s_id] = sch;
 						}
 						return s_acc;

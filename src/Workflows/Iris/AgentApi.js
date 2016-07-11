@@ -30,6 +30,19 @@ class AgentApi extends CommonApi {
 			});
 	}
 
+	getAgentKeys(organization, role) {
+		return this.getGlobal("membership_description")
+			.then((res) => {
+				let ag = res;
+				ag = _.filter(res, mm => {
+					if (organization && mm.organization != organization) return false;
+					if (role && mm.role != role) return false;
+					return true;
+				});
+				return _.uniq(_.map(ag, 'member'));
+			})
+	}
+
 	getActiveAgents() {
 		return super.getCache('active_agents');
 	}

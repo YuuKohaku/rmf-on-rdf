@@ -40,7 +40,7 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 				// let observed = {
 				// 	services: resolved.getAtom(services_path)
 				// 		.observe({
-				// 			operator_id: selection.operator,
+				// 			operator_id: selection.actor,
 				// 			selection: {
 				// 				service_id: selection.service,
 				// 				selection: time_description
@@ -48,19 +48,23 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 				// 		}),
 				// 	ops: resolved.getAtom(ops_path)
 				// 		.observe({
-				// 			operator_id: selection.operator,
+				// 			operator_id: selection.actor,
 				// 			selection: time_description
 				// 		}),
 				// 	plans: resolved.getAtom(plans_path)
 				// 		.observe({
-				// 			operator_id: selection.operator,
+				// 			operator_id: selection.actor,
 				// 			selection: time_description
 				// 		})
 				// };
+				// console.log("TSI I", require('util')
+				// 	.inspect(resolved[0].content, {
+				// 		depth: null
+				// 	}));
 				let observed = {
 					services: resolved[0]
 						.observe({
-							operator_id: selection.operator,
+							operator_id: selection.actor,
 							selection: {
 								service_id: selection.service,
 								selection: time_description
@@ -68,12 +72,12 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 						}),
 					ops: resolved[1]
 						.observe({
-							operator_id: selection.operator,
+							operator_id: selection.actor,
 							selection: time_description
 						}),
 					plans: resolved[2]
 						.observe({
-							operator_id: selection.operator,
+							operator_id: selection.actor,
 							selection: time_description
 						})
 				};
@@ -107,25 +111,18 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 
 		return ingredient_atom.resolve({
 				query: {
-					operator: value.operator,
+					actor: value[selection.actor_type],
 					dedicated_date: selection.dedicated_date,
-					operator_keys: selection.operator_keys,
+					actor_keys: selection.actor_keys,
 					organization: value.org_destination
 				}
 			})
 			.then((resolved) => {
 				resolved.free({
-					operator_id: value.operator,
+					operator_id: value[selection.actor_type],
 					selection: [value.time_description]
 				});
 				return ingredient_atom.save(resolved);
-			})
-			.then((saved) => {
-				return saved || false;
-			})
-			.catch((err) => {
-				console.error(err.stack);
-				return false;
 			});
 	}
 	set(params, value) {
@@ -141,30 +138,24 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 			})
 			.then((resolved) => {
 				_.map(data, (tick) => {
-					// console.log("RESOLVED", tick.time_description, require('util')
+					// console.log("RESOLVED", tick, require('util')
 					// 	.inspect(resolved.content, {
 					// 		depth: null
 					// 	}));
 					resolved.reserve({
-						operator_id: tick.operator,
+						operator_id: tick[selection.actor_type],
 						selection: [tick.time_description]
 					});
 					// console.log("RESOLVED II", tick, require('util')
-					// 	.inspect(resolved.content[tick.operator], {
+					// 	.inspect(resolved.content, {
 					// 		depth: null
 					// 	}));
-					saving_meta[tick.id] = resolved.content[tick.operator].id;
+					saving_meta[tick.id] = _.get(resolved, ['content', tick[selection.actor_type], 'id'], false);
 					// console.log("META", saving_meta);
 				});
 				return ingredient_atom.save(resolved);
 			})
-			.then((saved) => {
-				return saving_meta || false;
-			})
-			.catch((err) => {
-				console.error(err.stack);
-				return false;
-			});
+			.then((saved) => saving_meta);
 	}
 }
 

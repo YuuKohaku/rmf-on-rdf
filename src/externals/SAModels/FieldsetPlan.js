@@ -8,6 +8,15 @@ class FieldsetPlan extends Plan {
 	constructor(parent) {
 		super(parent);
 		this.template = new TemplateModel();
+		this.mark = parent.getMark() || {};
+	}
+
+	getMark() {
+		return this.mark;
+	}
+
+	addMark(key, val) {
+		this.mark[key] = val;
 	}
 
 	get fields() {

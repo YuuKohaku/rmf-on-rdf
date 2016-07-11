@@ -8,6 +8,17 @@ class FieldsetPlan extends Plan {
 	constructor(parent) {
 		super(parent);
 		this.template = new TemplateModel();
+		if (parent && parent.template)
+			this.template.build(parent.template.dbSerialize());
+		this.mark = parent && _.clone(parent.getMark()) || {};
+	}
+
+	getMark() {
+		return this.mark;
+	}
+
+	addMark(mark) {
+		_.assign(this.mark, mark);
 	}
 
 	get fields() {
@@ -32,6 +43,9 @@ class FieldsetPlan extends Plan {
 		//@FIXIT
 		if (data.spec) {
 			_.assign(this, data.spec);
+		}
+		if (node._mark) {
+			this.addMark(node._mark);
 		}
 		if (node['@id']) {
 			node['@type'] = "Plan";
@@ -90,6 +104,12 @@ class FieldsetPlan extends Plan {
 		return placed ? target.defragment() : false;
 	}
 
+	intersection(plan) {
+		let result = super.intersection(plan);
+		if (plan instanceof this.constructor)
+			result.addMark(plan.getMark());
+		return result;
+	}
 	defragment() {
 		this.sort();
 		let cnt = [];

@@ -35,28 +35,37 @@ class TSFactoryDataProvider {
 	}
 
 	getSource(sources, query) {
-		let picker = _.compact(_.castArray(query.operator || query.alt_operator));
-		console.log("PICKER", picker);
+		let picker = {
+			operator: _.castArray(_.get(query, ['locked_fields', 'operator'], false) || query.actor_type == 'operator' && query.actor || '*'),
+			destination: _.castArray(_.get(query, ['locked_fields', 'destination'], false) || query.actor_type == 'destination' && query.actor || '*')
+		};
+		let pick = _.map(picker, (val, prop_key) => {
+			return (mark_val) => {
+				let prop_val = mark_val[prop_key];
+				return !prop_val || !!~_.indexOf(picker[prop_key], '*') || !!~_.indexOf(picker[prop_key], prop_val);
+			};
+		});
+		// console.log("PICKER", picker, query);
 		let cnt = query.service_count > 0 ? query.service_count : 1;
-		let ops = _.reduce(_.pick(sources, picker), (acc, op_s, op_id) => {
-			if (op_s[query.service]) {
-				acc[op_id] = op_s[query.service].parent.intersection(op_s[query.service]);
-				acc[op_id].owner = op_id;
-			}
-			return acc;
-		}, {});
+		let ops = _(sources)
+			.reduce((acc, op_s, op_id) => {
+				let src = op_s[query.service];
+				// console.log("AAA", op_id, src);
+				if (src && _.every(pick, fn => fn(src.getMark()))) {
+					acc[op_id] = src.parent.intersection(src);
+				}
+				return acc;
+			}, {});
 
 		// console.log("OPS", require('util')
 		// 	.inspect(ops, {
 		// 		depth: null
 		// 	}));
-		let operator = false;
 		let time_description = _.isArray(query.time_description) ? query.time_description : false;
 		let source;
 
 		if (time_description) {
 			source = _.find(ops, (src) => {
-				operator = src.owner || src.parent.owner;
 				return !!src.reserve([time_description]);
 			});
 		} else {
@@ -81,15 +90,12 @@ class TSFactoryDataProvider {
 					});
 				if (!first) return false;
 				time_description = [first.start, first.start + interval];
-				operator = src.owner || src.parent.owner;
-
 				return !!src.reserve([time_description]);
 			});
 		}
 		return {
 			source,
-			time_description,
-			operator
+			time_description
 		};
 	}
 
@@ -108,12 +114,10 @@ class TSFactoryDataProvider {
 		let placed = [];
 		let lost = [];
 		_.map(ordered, (ticket) => {
-			ticket.alt_operator = ticket.alt_operator && !_.isEmpty(ticket.alt_operator) ? _.castArray(ticket.alt_operator) : ops_by_service[ticket.service];
 			// console.log("OPS_BY_SERV", ops_by_service);
 			let {
 				source,
-				time_description,
-				operator
+				time_description
 			} = this.getSource(sources, ticket);
 			// console.log("TICK", ticket, operator);
 			// console.log("PLAN", time_description, source);
@@ -123,7 +127,10 @@ class TSFactoryDataProvider {
 			}
 			if (set_data) {
 				ticket.time_description = time_description;
-				ticket.operator = operator;
+				ticket.operator = (source.getMark())
+					.operator;
+				ticket.destination = (source.getMark())
+					.destination;
 				//@FIXIT
 				ticket.source = source.id || source.parent.id;
 			}
@@ -169,10 +176,10 @@ class TSFactoryDataProvider {
 	}
 
 	get(params) {
-		// console.log("PARMAS", require('util')
-		// 	.inspect(params, {
-		// 		depth: null
-		// 	}));
+		console.log("PARMAS", require('util')
+			.inspect(params, {
+				depth: null
+			}));
 		time = process.hrtime();
 		return this.placeExisting(params)
 			.then(({
@@ -261,7 +268,8 @@ class TSFactoryDataProvider {
 		}, {});
 		return Promise.props(complete)
 			.then((saved) => {
-				if (!_.every(saved))
+				console.log("SAVED", saved);
+				if (!_.every(saved, s => _.every(s)))
 					return false;
 				let tick = to_place;
 				tick.source = saved.ldplan[tick.id];

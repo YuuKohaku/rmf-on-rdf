@@ -8,24 +8,11 @@ module.exports = {
 		if (!query)
 			return {};
 		let chain = [];
-		let m_key = query.operator_keys;
-		chain.push({
-			name: "mm",
-			in_keys: [m_key]
-		});
+		let op_keys = query.actor == '*' ? query.actor_keys : _.intersection(_.castArray(query.actor), query.actor_keys);
 		chain.push({
 			name: "ops",
 			transactional: true,
-			out_keys: (md) => {
-				// console.log("MD", md);
-				let members = _.get(md[m_key], 'value.content', false) || md[m_key];
-				let ops = _.map(_.filter(members, (mm) => (mm.role == "Operator" && mm.organization == query.organization)), "member");
-				let op_keys = _.uniq(_.flattenDeep(ops));
-				if (_.isEmpty(op_keys)) {
-					console.log("EMPTY!", members);
-				}
-				return (query.operator == '*') ? op_keys : _.intersection(op_keys, _.castArray(query.operator));
-			}
+			in_keys: op_keys
 		});
 		chain.push({
 			name: "schedules",
@@ -51,16 +38,17 @@ module.exports = {
 				let reduced = _.reduce(ops, (acc, val, key) => {
 					let sch = _.find(schedules, (sch, sch_id) => {
 						// console.log("SCH", sch_id, key, day, !!~_.indexOf(_.castArray(val.has_schedule[query.method]), sch_id, _.castArray(val.has_schedule[query.method])));
-						return !!~_.indexOf(_.castArray(val.has_schedule[query.method]), sch_id) && !!~_.indexOf(sch.has_day, day);
+						return !!~_.indexOf(_.castArray(_.get(val, ['has_schedule', query.method], [])), sch_id) && !!~_.indexOf(sch.has_day, day);
 					});
-					if (sch)
+					if (sch) {
+						sch = _.cloneDeep(sch);
+						sch._mark = {};
+						sch._mark[query.actor_type] = key;
 						acc[key] = sch;
+					}
 					return acc;
 				}, {});
 				// console.log("REDUCED OPLANS", reduced);
-				if (_.isEmpty(reduced)) {
-					console.log(res);
-				}
 				return reduced;
 			}
 		};
