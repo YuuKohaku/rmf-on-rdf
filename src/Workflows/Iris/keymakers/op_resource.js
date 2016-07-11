@@ -9,21 +9,11 @@ module.exports = {
 			return {};
 		let plan_id = _.isString(query.dedicated_date) ? dedicated_date : query.dedicated_date.format("YYYY-MM-DD");
 		let chain = [];
-		let m_key = query.operator_keys;
-		chain.push({
-			name: "mm",
-			in_keys: [m_key]
-		});
+		let op_keys = query.actor == '*' ? query.actor_keys : _.intersection(_.castArray(query.actor), query.actor_keys);
 		chain.push({
 			name: "ops",
 			transactional: true,
-			out_keys: (md) => {
-				// console.log(md);
-				let members = _.get(md[m_key], 'value.content', false) || md[m_key];
-				let ops = _.map(_.filter(members, (mm) => (mm.role == "Operator" && mm.organization == query.organization)), "member");
-				let op_keys = _.uniq(_.flattenDeep(ops));
-				return (query.operator == '*') ? op_keys : _.intersection(op_keys, _.castArray(query.operator));
-			}
+			in_keys: op_keys
 		});
 		chain.push({
 			name: "schedules",
@@ -36,6 +26,7 @@ module.exports = {
 				return _.uniq(_.flattenDeep(schedules));
 			}
 		});
+
 		let req = {
 			type: 'chain',
 			key_depth: 1,
@@ -51,12 +42,15 @@ module.exports = {
 				let schedules = _.keyBy(_.map(res.schedules, "value"), "@id");
 				let reduced = _.reduce(ops, (acc, val, key) => {
 					let sch = _.find(schedules, (sch, sch_id) => {
-						return !!~_.indexOf(_.castArray(val.has_schedule.resource), sch_id) && !!~_.indexOf(sch.has_day, day);
+						return !!~_.indexOf(_.castArray(_.get(val, ['has_schedule', 'resource'], [])), sch_id) && !!~_.indexOf(sch.has_day, day);
 					});
 					if (sch) {
+						sch = _.cloneDeep(sch);
 						acc[key] = {};
 						let k = `${key}-${query.organization}-plan--${plan_id}`;
 						acc[key][k] = schedules[k];
+						sch._mark = {};
+						sch._mark[query.actor_type] = key;
 						templates[key] = sch;
 					}
 					return acc;

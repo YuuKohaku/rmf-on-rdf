@@ -112,9 +112,10 @@ class IrisBuilder {
 				return {
 					selection: {
 						ldplan: {
-							operator: query.operator || '*',
+							actor: query.actor || '*',
+							actor_type: query.actor_type,
 							service_keys: query.service_keys,
-							operator_keys: query.operator_keys,
+							actor_keys: query.actor_keys,
 							organization: query.organization,
 							service: '*',
 							time_description: query.time_description,
@@ -122,7 +123,6 @@ class IrisBuilder {
 							dedicated_date: query.dedicated_date
 						}
 					},
-					box_id: '*',
 					reserve: query.reserve || false,
 					count: query.count,
 					quota_status: query.quota_status
@@ -132,12 +132,13 @@ class IrisBuilder {
 				return {
 					selection: {
 						ldplan: {
-							operator: query.operator || '*',
-							organization: query.organization,
+							actor: query.actor || '*',
+							actor_type: query.actor_type,
 							service: '*',
 							service_keys: query.service_keys,
-							operator_keys: query.operator_keys,
+							actor_keys: query.actor_keys,
 							time_description: query.time_description,
+							organization: query.organization,
 							service_count: query.service_count,
 							method: query.method || 'live',
 							dedicated_date: query.dedicated_date
@@ -145,7 +146,6 @@ class IrisBuilder {
 					},
 					services: query.services,
 					ticket_properties: query.ticket_properties,
-					box_id: '*',
 					count: query.count,
 					existing_only: !!query.existing_only
 				};
