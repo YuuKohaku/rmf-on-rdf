@@ -105,6 +105,7 @@ class TSIngredientDataProvider extends IngredientDataProvider {
 	}
 
 	free(params, value) {
+		// console.log("FREE", params, value);
 		let plans_path = ['<namespace>content', 'plan'];
 		let ingredient_atom = this.ingredient.getAtom(plans_path);
 		let selection = params.selection[this.property];
