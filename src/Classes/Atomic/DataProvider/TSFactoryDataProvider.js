@@ -268,7 +268,6 @@ class TSFactoryDataProvider {
 		}, {});
 		return Promise.props(complete)
 			.then((saved) => {
-				console.log("SAVED", saved);
 				if (!_.every(saved, s => _.every(s)))
 					return false;
 				let tick = to_place;

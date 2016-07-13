@@ -41,13 +41,24 @@ module.exports = {
 				let ops = _.keyBy(_.map(_.compact(res.ops), "value"), "@id");
 				let schedules = _.keyBy(_.map(res.schedules, "value"), "@id");
 				let reduced = _.reduce(ops, (acc, val, key) => {
+					let k = `${key}-${query.organization}-plan--${plan_id}`;
 					let sch = _.find(schedules, (sch, sch_id) => {
-						return !!~_.indexOf(_.castArray(_.get(val, ['has_schedule', 'resource'], [])), sch_id) && !!~_.indexOf(sch.has_day, day);
+						return !!~_.indexOf(_.castArray(_.get(val, ['has_schedule', 'resource'], [])), sch_id) && (!!~_.indexOf(sch.has_day, day) || !!~_.indexOf(sch.has_day, '*'));
 					});
+					if (!sch && query.allow_virtual) {
+						sch = {
+							"@id": k,
+							"@type": "Plan",
+							"has_day": ["*"],
+							"has_time_description": {
+								"data": [[0, 86400]],
+								"state": "a"
+							}
+						};
+					}
 					if (sch) {
 						sch = _.cloneDeep(sch);
 						acc[key] = {};
-						let k = `${key}-${query.organization}-plan--${plan_id}`;
 						acc[key][k] = schedules[k];
 						sch._mark = {};
 						sch._mark[query.actor_type] = key;
@@ -55,7 +66,7 @@ module.exports = {
 					}
 					return acc;
 				}, {});
-				// console.log("RES FIN RESOURCE", reduced, templates);
+				console.log("RES FIN RESOURCE", reduced, templates);
 				return {
 					keys: reduced,
 					templates
