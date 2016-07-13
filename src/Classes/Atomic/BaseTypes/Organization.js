@@ -8,7 +8,8 @@ class Organization extends DatabaseFieldset {
 						"booking_methods", "live_autopostpone", "live_autorestore", "live_autopostpone_count",
 						"prebook_expiration_interval", "prebook_show_interval", "prebook_label_prefix", "prebook_observe_offset",
 						"prebook_register_interval", "error_dialog_duration", "formatted_address", "mkgu_code", "qa_enabled", "auto_logout_time",
-						"auto_warmup_time", "workstation_resource_enabled", "employee_resource_enabled", "notification_levels"];
+						"auto_warmup_time", "workstation_resource_enabled", "employee_resource_enabled", "notification_levels",
+						"sound_theme"];
 	}
 
 	static get references() {
