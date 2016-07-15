@@ -22,7 +22,9 @@ module.exports = {
 				let mask = ops[query.service_keys] || [];
 				_.unset(ops, query.service_keys);
 				// console.log("SERVICES", _.intersection(_.flatMap(ops, "value.provides"), _.get(mask, "value.content", [])));
-				return _.intersection(_.flatMap(ops, "value.provides"), _.get(mask, "value.content", false) || mask || []);
+				let msk = _.get(mask, "value.content", false) || mask || [];
+				let op_srvs = _.uniq(_.compact(_.flatMap(ops, (op) => (_.get(op, ['value', 'provides'], false) || msk))));
+				return _.intersection(op_srvs, msk);
 			};
 		} else {
 			s_in_keys = _.castArray(query.service);
@@ -51,7 +53,7 @@ module.exports = {
 				let ops = _.keyBy(_.map(res.ops, "value"), "@id");
 				let schedules = _.keyBy(_.map(res.schedules, "value"), "@id");
 				let reduced = _.reduce(ops, (acc, val, key) => {
-					acc[key] = _.reduce(val.provides, (s_acc, s_id) => {
+					acc[key] = _.reduce(val.provides || _.keys(services), (s_acc, s_id) => {
 						let sch = _.find(schedules, (sch, sch_id) => {
 							// console.log("SCH", sch_id, services[s_id], s_id, key);
 							return services[s_id] && !!~_.indexOf(_.castArray(_.get(services, [s_id, 'has_schedule', query.method], [])), sch_id) && !!~_.indexOf(sch.has_day, day);
