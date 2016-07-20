@@ -176,10 +176,10 @@ class TSFactoryDataProvider {
 	}
 
 	get(params) {
-		console.log("PARMAS", require('util')
-			.inspect(params, {
-				depth: null
-			}));
+		// console.log("PARMAS", require('util')
+		// 	.inspect(params, {
+		// 		depth: null
+		// 	}));
 		time = process.hrtime();
 		return this.placeExisting(params)
 			.then(({

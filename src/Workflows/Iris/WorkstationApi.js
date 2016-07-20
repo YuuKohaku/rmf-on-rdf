@@ -114,7 +114,7 @@ class WorkstationApi extends CommonApi {
 	}
 
 	getWorkstationOrganizationChain(org_key) {
-		let org_keys = _.uniq(_.castArray(org_key));
+		let org_keys = _.compact(_.uniq(_.castArray(org_key)));
 		let orgs = {};
 		return this.getOrganizationTree()
 			.then((orgtree) => {
@@ -125,8 +125,9 @@ class WorkstationApi extends CommonApi {
 					})
 					.keyBy("id")
 					.value();
-				if (!org_key) org_keys = _.keys(orgs);
+				if (!org_key) org_keys = _.compact(_.keys(orgs));
 				return _.reduce(org_keys, (acc, key) => {
+					console.log("ORGKEYS", key, org_keys);
 					let org = orgs[key];
 					acc[key] = {
 						'0': org

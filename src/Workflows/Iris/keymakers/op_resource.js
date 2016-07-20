@@ -66,7 +66,7 @@ module.exports = {
 					}
 					return acc;
 				}, {});
-				console.log("RES FIN RESOURCE", reduced, templates);
+				// console.log("RES FIN RESOURCE", reduced, templates);
 				return {
 					keys: reduced,
 					templates
