@@ -20,11 +20,11 @@ let TypeModel = require(base_dir + '/build/Classes/Atomic/BaseTypes/Ticket');
 
 class IrisBuilder {
 	static init(db, cfg) {
-		this.default_slot_size = cfg.default_slot_size;
+		this.default_slot_size = _.get(cfg, 'default_slot_size', 15 * 3600);
 		this.db = db;
 	}
-	static getResourceSource() {
-		let dp = new CouchbirdDataProvider(this.db);
+	static getResourceSource(DataProviderClass = CouchbirdDataProvider) {
+		let dp = new DataProviderClass(this.db);
 
 		let ops_resource_accessor = new RDCacheAccessor(dp);
 		let ops_accessor = new LDAccessor(dp);
@@ -92,8 +92,6 @@ class IrisBuilder {
 	}
 
 	static getFactory(ingredients, box_storage, order) {
-		let dp = new CouchbirdDataProvider(this.db);
-
 		let data_model = {
 			type: 'Ticket',
 			deco: 'BaseCollection',

@@ -114,14 +114,6 @@ class CouchbirdDataProvider extends AbstractDataProvider {
 	}
 
 	set(values, options) {
-		if (this.record) {
-			_.map(_.castArray(values.data), (node) => {
-				if (this.cache[node["@id"]])
-					this.cache[node["@id"]] = {
-						value: node
-					};
-			});
-		}
 		switch (values.type) {
 		case 'insert':
 			return this.insert(values, options);

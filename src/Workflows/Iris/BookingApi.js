@@ -4,6 +4,7 @@ let IrisBuilder = require("./Builder");
 let IrisApi = require("./IrisApi");
 let TicketApi = require("./TicketApi");
 
+
 //temporary here
 //@TODO make all this bullshit in a righteous way
 class BookingApi extends IrisApi {
@@ -11,9 +12,8 @@ class BookingApi extends IrisApi {
 		super();
 	}
 	initContent() {
-		IrisBuilder.init(this.db, {
-			default_slot_size: 15 * 3600
-		});
+		IrisBuilder.init(this.db);
+
 		let rs = IrisBuilder.getResourceSource();
 		let ingredients = {
 			'ldplan': rs
@@ -24,6 +24,22 @@ class BookingApi extends IrisApi {
 
 
 		this.factory = IrisBuilder.getFactory(ingredients, box_storage, this.ticket_api.sort);
+	}
+
+	getCachingFactory(datasource) {
+		IrisBuilder.init(this.db);
+
+		let rs = IrisBuilder.getResourceSource(datasource);
+		let ingredients = {
+			'ldplan': rs
+		};
+		if (!this.ticket_api) {
+			this.ticket_api = new TicketApi();
+			this.ticket_api.initContent();
+		}
+		let box_storage = this.ticket_api.getContent('Ticket');
+
+		return IrisBuilder.getFactory(ingredients, box_storage, this.ticket_api.sort);
 	}
 
 	getContent() {
