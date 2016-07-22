@@ -39,7 +39,11 @@ class BookingApi extends IrisApi {
 		}
 		let box_storage = this.ticket_api.getContent('Ticket');
 
-		return IrisBuilder.getFactory(ingredients, box_storage, this.ticket_api.sort);
+		return {
+			factory: IrisBuilder.getFactory(ingredients, box_storage, this.ticket_api.sort),
+			datasource: rs.ingredient.getAtom(['<namespace>content', 'plan'])
+				.accessor.data_provider
+		};
 	}
 
 	getContent() {
