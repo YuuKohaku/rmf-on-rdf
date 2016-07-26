@@ -388,12 +388,18 @@ class TSFactoryDataProvider {
 							return acc;
 						}, 0);
 						let max_solid = {};
+						let mapping = {};
+						mapping[method] = [];
 						max_solid[method] = _.max(_.map(plans, (plan) => plan ? _.max(_.map(plan.content, chunk => {
 							if (chunk.getState()
-								.haveState('a')) return chunk.getLength();
-							else return 0;
+								.haveState('a')) {
+								let len = chunk.getLength();
+								mapping[method].push(len);
+								return len;
+							} else return 0;
 						})) : 0)) || 0;
 						let plan_stats = {
+							mapping,
 							max_available,
 							available,
 							reserved,
