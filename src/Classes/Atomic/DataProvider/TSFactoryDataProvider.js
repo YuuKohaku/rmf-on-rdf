@@ -155,7 +155,7 @@ class TSFactoryDataProvider {
 					query: {
 						dedicated_date: params.selection.ldplan.dedicated_date,
 						org_destination: params.selection.ldplan.organization,
-						state: ['registered', 'booked']
+						state: ['registered', 'booked', 'called', 'postponed']
 					},
 					options: {}
 				})
@@ -303,7 +303,7 @@ class TSFactoryDataProvider {
 							return srcValue;
 						}
 					});
-					console.log(to_free, to_reserve);
+					// console.log(to_free, to_reserve);
 					let placing = _.reduce(to_reserve, (acc, tick, key) => {
 						acc[key] = this.saveTicket(params, tick, to_free[key] || {});
 						return acc;
