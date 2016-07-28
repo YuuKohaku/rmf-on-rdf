@@ -146,6 +146,7 @@ class TSFactoryDataProvider {
 
 
 	placeExisting(params) {
+		let time = process.hrtime();
 		return Promise.props({
 				space: Promise.props(_.reduce(this.ingredients, (result, ingredient, property) => {
 					result[property] = ingredient.get(params);
