@@ -50,10 +50,15 @@ module.exports = {
 			final: function (res) {
 				let day = query.dedicated_date.format('dddd');
 				let services = _.keyBy(_.map(res.services, "value"), "@id");
+				let all_services = _.keys(services);
 				let ops = _.keyBy(_.map(res.ops, "value"), "@id");
 				let schedules = _.keyBy(_.map(res.schedules, "value"), "@id");
 				let reduced = _.reduce(ops, (acc, val, key) => {
-					acc[key] = _.reduce(val.provides || _.keys(services), (s_acc, s_id) => {
+					let provision = val.provides || [];
+					if (!!~_.indexOf(provision, '*')) {
+						provision = all_services;
+					}
+					acc[key] = _.reduce(provision, (s_acc, s_id) => {
 						let sch = _.find(schedules, (sch, sch_id) => {
 							// console.log("SCH", sch_id, services[s_id], s_id, key);
 							return services[s_id] && !!~_.indexOf(_.castArray(_.get(services, [s_id, 'has_schedule', query.method], [])), sch_id) && !!~_.indexOf(sch.has_day, day);
