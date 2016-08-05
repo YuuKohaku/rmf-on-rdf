@@ -26,10 +26,11 @@ class CommonApi extends IrisApi {
 	getCache(name, params = [], options = {}) {
 		let cname = this.getSystemName('cache', name, params);
 		let cached = inmemory_cache.get(cname);
-		return cached && Promise.resolve(cached) || this.db.get(cname)
+		if (cached) return Promise.resolve(cached);
+		return this.db.get(cname)
 			.then((res) => {
 				let r = _.get(res, 'value.content', false);
-				r && !options.no_memcache && inmemory_cache.set(cname, r);
+				if (r && !options.no_memcache) inmemory_cache.set(cname, r);
 				return r || {};
 			});
 	}
@@ -52,10 +53,11 @@ class CommonApi extends IrisApi {
 	getLookup(name, params = []) {
 		let cname = this.getSystemName('lookup', name, params);
 		let cached = inmemory_cache.get(cname);
-		return cached && Promise.resolve(cached) || this.db.get(cname)
+		if (cached) return Promise.resolve(cached);
+		return this.db.get(cname)
 			.then((res) => {
 				let r = _.get(res, 'value.content', false);
-				r && inmemory_cache.set(cname, r);
+				if (r) inmemory_cache.set(cname, r);
 				return r;
 			});
 	}
@@ -74,10 +76,12 @@ class CommonApi extends IrisApi {
 	getGlobal(name, params = []) {
 		let cname = this.getSystemName('global', name, params);
 		let cached = inmemory_cache.get(cname);
-		return cached && Promise.resolve(cached) || this.db.get(cname)
+		if (cached)
+			return Promise.resolve(cached);
+		return this.db.get(cname)
 			.then((res) => {
 				let r = _.get(res, 'value.content', false);
-				r && inmemory_cache.set(cname, r);
+				if (r) inmemory_cache.set(cname, r);
 				return r;
 			});
 	}
@@ -96,10 +100,11 @@ class CommonApi extends IrisApi {
 	getRegistry(name, params = []) {
 		let cname = this.getSystemName('registry', name, params);
 		let cached = inmemory_cache.get(cname);
-		return cached && Promise.resolve(cached) || this.db.get(cname)
+		if (cached) return Promise.resolve(cached);
+		return this.db.get(cname)
 			.then((res) => {
 				let r = _.get(res, 'value.content', false);
-				r && inmemory_cache.set(cname, r);
+				if (r) inmemory_cache.set(cname, r);
 				return r || [];
 			});
 	}
