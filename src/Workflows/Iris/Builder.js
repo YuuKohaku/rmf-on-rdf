@@ -156,7 +156,7 @@ class IrisBuilder {
 		factory_provider
 			.addStorage(box_storage)
 			.addFinalizer((data) => {
-				let tickets = _.filter(data, _.isPlainObject);
+				let tickets = (data.constructor === Array) ? data : (data.tickets ? _.castArray(data.tickets) : []);
 				let res = _.map(tickets, (t_data) => {
 					return Model.buildSerialized(t_data);
 				});
