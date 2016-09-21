@@ -127,7 +127,6 @@ class WorkstationApi extends CommonApi {
 					.value();
 				if (!org_key) org_keys = _.compact(_.keys(orgs));
 				return _.reduce(org_keys, (acc, key) => {
-					console.log("ORGKEYS", key, org_keys);
 					let org = orgs[key];
 					acc[key] = {
 						'0': org
@@ -143,6 +142,7 @@ class WorkstationApi extends CommonApi {
 	}
 
 	getWorkstationOrganizationSchedulesChain(org_key) {
+
 		let prov;
 		let time = process.hrtime();
 		return this.getWorkstationOrganizationChain(org_key)

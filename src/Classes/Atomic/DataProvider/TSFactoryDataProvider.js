@@ -215,20 +215,19 @@ class TSFactoryDataProvider {
 
 				_.map(params.services, ({
 					service: s_id,
-					time_description
+					time_description,
+					service_count
 				}) => {
-					for (let i = 0; i < params.count; i++) {
-						let t = {
-							time_description,
-							dedicated_date: params.selection.ldplan.dedicated_date,
-							service: s_id,
-							service_count: _.parseInt(params.selection.ldplan.service_count)
-						};
-						_.merge(t, params.ticket_properties);
-						ticket_data.push(t);
-					}
+					let t = {
+						time_description,
+						dedicated_date: params.selection.ldplan.dedicated_date,
+						service: s_id,
+						service_count: _.parseInt(service_count)
+					};
+					_.merge(t, params.ticket_properties);
+					ticket_data.push(t);
 				});
-
+				console.log("------------------------------------------------------\n", ticket_data);
 				diff = process.hrtime(time);
 				// console.log("TICKS DATA PREPARED IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
 				time = process.hrtime();

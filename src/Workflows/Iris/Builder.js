@@ -123,7 +123,6 @@ class IrisBuilder {
 						}
 					},
 					reserve: query.reserve || false,
-					count: query.count,
 					quota_status: query.quota_status
 				};
 			})
@@ -138,14 +137,12 @@ class IrisBuilder {
 							actor_keys: query.actor_keys,
 							time_description: query.time_description,
 							organization: query.organization,
-							service_count: query.service_count,
 							method: query.method || 'live',
 							dedicated_date: query.dedicated_date
 						}
 					},
 					services: query.services,
 					ticket_properties: query.ticket_properties,
-					count: query.count,
 					existing_only: !!query.existing_only
 				};
 			});

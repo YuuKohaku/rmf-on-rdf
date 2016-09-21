@@ -75,7 +75,7 @@ module.exports = {
 	},
 	set: (data) => {
 		// console.log("SETTING TICK", data);
-		if (_.every(data, (d) => !_.isUndefined(d["@id"]))) {
+		if (_.every(data, (d) => !_.isUndefined(d["@id"]) && d['@id'][d['@id'].length - 1] != '*')) {
 			let options = {};
 			let access = _.map(data, (item) => {
 				let entity = item;
