@@ -142,6 +142,7 @@ class IrisBuilder {
 						}
 					},
 					services: query.services,
+					count: query.count || 1,
 					ticket_properties: query.ticket_properties,
 					existing_only: !!query.existing_only
 				};
