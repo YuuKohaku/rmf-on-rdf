@@ -210,8 +210,6 @@ class TSFactoryDataProvider {
 					//		console.log("LOST", lost);
 					//		console.log("-------------------------------------------------------------------------------------------------------");
 				}
-				if (params.existing_only)
-					return placed;
 
 				_.map(params.services, ({
 					service: s_id,
@@ -254,7 +252,10 @@ class TSFactoryDataProvider {
 				// console.log("PLACE NEW IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
 				time = process.hrtime();
 
-				return placed_new;
+				return {
+					placed: placed_new,
+					success: (new_tickets.length == placed_new.length)
+				};
 			});
 
 	}
@@ -418,12 +419,19 @@ class TSFactoryDataProvider {
 				let diff = process.hrtime(time);
 				console.log('TSFDP QUOTA IN %d seconds', diff[0] + diff[1] / 1e9, method, params.quota_status);
 				time = process.hrtime();
+				let placed_final;
+				if (lost.length > 0) {
+					all_lost = all_lost.concat(placed_new);
+					placed_final = [];
+				} else {
+					placed_final = this.storage_accessor.set(placed_new);
+				}
 
 				return Promise.props({
-					placed: this.storage_accessor.set(placed_new),
-					out_of_range,
+					placed: placed_final,
+					out_of_range: out_of_range,
 					lost: all_lost,
-					stats
+					stats: stats
 				});
 			});
 	}
