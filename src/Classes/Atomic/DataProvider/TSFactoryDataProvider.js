@@ -205,11 +205,11 @@ class TSFactoryDataProvider {
 					return _.isArray(tick.time_description) && (tick.time_description[0] < td[0] || tick.time_description[1] > td[1]);
 				});
 				let ticket_data = [];
-				if (!_.isEmpty(lost)) {
-					//		console.log("-------------------------------------------------------------------------------------------------------");
-					//		console.log("LOST", lost);
-					//		console.log("-------------------------------------------------------------------------------------------------------");
-				}
+			// if (!_.isEmpty(lost)) {
+			// 	console.log("-------------------------------------------------------------------------------------------------------");
+			// 	console.log("LOST", lost);
+			// 	console.log("-------------------------------------------------------------------------------------------------------");
+			// }
 
 				_.map(params.services, ({
 					service: s_id,
@@ -244,7 +244,11 @@ class TSFactoryDataProvider {
 					remains: remains_new
 				} = this.resolvePlacing(new_tickets, remains, true);
 				// console.log("NEW TICKS PLACED", require('util')
-				// 	.inspect(remains_new, {
+				// 	.inspect(placed_new, {
+				// 		depth: null
+				// 	}));
+				// console.log("NEW TICKS LOST", require('util')
+				// 	.inspect(lost_new, {
 				// 		depth: null
 				// 	}));
 
@@ -252,10 +256,19 @@ class TSFactoryDataProvider {
 				// console.log("PLACE NEW IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
 				time = process.hrtime();
 
-				return {
-					placed: placed_new,
-					success: (new_tickets.length == placed_new.length)
-				};
+				let result = [],
+					len = placed_new.length;
+				while (len--) {
+					placed_new[len].success = true;
+					result.push(placed_new[len]);
+				}
+
+				len = lost_new.length;
+				while (len--) {
+					lost_new[len].success = false;
+					result.push(lost_new[len]);
+				}
+				return result;
 			});
 
 	}
