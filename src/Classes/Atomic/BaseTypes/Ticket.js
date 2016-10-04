@@ -21,7 +21,7 @@ class Ticket extends DatabaseFieldset {
 	}
 
 	static get references() {
-		return ['service', 'operator', 'alt_operator', 'destination', 'org_destination', 'source'];
+		return ['session', 'service', 'operator', 'alt_operator', 'destination', 'org_destination', 'source'];
 	}
 
 }
