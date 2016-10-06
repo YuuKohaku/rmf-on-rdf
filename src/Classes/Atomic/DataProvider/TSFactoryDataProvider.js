@@ -205,11 +205,11 @@ class TSFactoryDataProvider {
 					return _.isArray(tick.time_description) && (tick.time_description[0] < td[0] || tick.time_description[1] > td[1]);
 				});
 				let ticket_data = [];
-			// if (!_.isEmpty(lost)) {
-			// 	console.log("-------------------------------------------------------------------------------------------------------");
-			// 	console.log("LOST", lost);
-			// 	console.log("-------------------------------------------------------------------------------------------------------");
-			// }
+				// if (!_.isEmpty(lost)) {
+				// 	console.log("-------------------------------------------------------------------------------------------------------");
+				// 	console.log("LOST", lost);
+				// 	console.log("-------------------------------------------------------------------------------------------------------");
+				// }
 
 				_.map(params.services, ({
 					service: s_id,
@@ -368,7 +368,7 @@ class TSFactoryDataProvider {
 					remains: remains_new
 				} = this.resolvePlacing(new_tickets, remains);
 				let all_placed = _.concat(placed, placed_new);
-				let all_lost = lost_new;
+				let all_lost = lost_new || [];
 
 				//feeling ashamed
 				//@FIXIT
