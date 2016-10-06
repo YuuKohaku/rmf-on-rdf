@@ -3,8 +3,8 @@
 let DatabaseFieldset = require("./DatabaseFieldset");
 
 class History extends DatabaseFieldset {
-	static get fields(){
-		return  ["event_name", "time", "reason", "subject", "object", "local_time"];
+	static get fields() {
+		return ["event_name", "time", "reason", "subject", "object", "local_time", "context"];
 	}
 
 	static get references() {
