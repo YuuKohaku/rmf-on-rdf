@@ -152,7 +152,7 @@ class TSFactoryDataProvider {
 				query: {
 					dedicated_date: params.selection.ldplan.dedicated_date,
 					org_destination: params.selection.ldplan.organization,
-					state: ['registered', 'booked', 'called', 'postponed']
+					state: ['registered', 'booked', 'called']
 				},
 				options: {}
 			})
