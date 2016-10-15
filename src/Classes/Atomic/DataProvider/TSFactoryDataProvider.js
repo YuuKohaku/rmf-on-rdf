@@ -339,6 +339,11 @@ class TSFactoryDataProvider {
 				});
 		}
 		///tick confirm
+		if (params.nocheck) {
+			return Promise.props({
+				placed: this.storage_accessor.set(new_tickets)
+			});
+		}
 		return this.placeExisting(params)
 			.then(({
 				remains,
@@ -362,7 +367,22 @@ class TSFactoryDataProvider {
 				} = this.resolvePlacing(new_tickets, remains);
 				let all_placed = _.concat(placed, placed_new);
 				let all_lost = lost_new || [];
-
+				console.log("LOST NEW", require('util')
+					.inspect(lost_new, {
+						depth: null
+					}));
+				console.log("PLACED_NEW", require('util')
+					.inspect(placed_new, {
+						depth: null
+					}));
+				console.log("LOST", require('util')
+					.inspect(lost, {
+						depth: null
+					}));
+				console.log("PLACED", require('util')
+					.inspect(placed, {
+						depth: null
+					}));
 				//feeling ashamed
 				//@FIXIT
 				let stats;
