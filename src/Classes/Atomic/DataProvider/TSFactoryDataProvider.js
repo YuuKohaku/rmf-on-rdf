@@ -152,7 +152,7 @@ class TSFactoryDataProvider {
 				query: {
 					dedicated_date: params.selection.ldplan.dedicated_date,
 					org_destination: params.selection.ldplan.organization,
-					state: ['registered', 'booked', 'called']
+					state: ['registered', 'booked', 'called', 'postponed']
 				},
 				options: {}
 			})
@@ -367,6 +367,12 @@ class TSFactoryDataProvider {
 				} = this.resolvePlacing(new_tickets, remains);
 				let all_placed = _.concat(placed, placed_new);
 				let all_lost = lost_new || [];
+				let srv = _.map(all_placed, 'service')
+					.concat(_.map(new_tickets, 'service'))
+				console.log("REMAINS", require('util')
+					.inspect(_.mapValues(remains, r => _.pick(r, srv)), {
+						depth: null
+					}));
 				console.log("LOST NEW", require('util')
 					.inspect(lost_new, {
 						depth: null
@@ -446,7 +452,7 @@ class TSFactoryDataProvider {
 				// console.log('TSFDP QUOTA IN %d seconds', diff[0] + diff[1] / 1e9, method, params.quota_status);
 				// time = process.hrtime();
 				let placed_final;
-				lost = _.filter(lost, r => r.state != "booked");
+				lost = _.filter(lost, r => r.booking_method != "prebook");
 				if (lost.length > 0) {
 					all_lost = all_lost.concat(placed_new);
 					placed_final = [];
