@@ -28,41 +28,10 @@ class WorkstationApi extends CommonApi {
 	}
 
 	getWorkstationsCache(org) {
-		return super.getCache('workstations', [org]);
+		return super.getRegistry('workstation', [org])
+			.then(registry => Promise.props(_.mapValues(registry, (ids) => this.getEntryTypeless(ids))));
 	}
 
-	updateWorkstationsCache(organization, new_ws = []) {
-		let props = ['id', 'type', 'attached_to', 'short_label', 'occupied_by', 'device_type', 'provides', 'has_schedule', 'maintains', 'state'];
-		return Promise.map(_.castArray(organization), org => this.getWorkstationsCache(org))
-			.then(res => {
-				let keys = _(res)
-					.map(_.values)
-					.flattenDeep()
-					.map('id')
-					.concat(new_ws)
-					.uniq()
-					.compact()
-					.value();
-				return this.getEntryTypeless(keys);
-			})
-			.then(res => {
-				let data = _(res)
-					.values()
-					.compact()
-					.map(v => _.pick(v, props))
-					.map(v => {
-						v.occupied_by = _.compact(v.occupied_by);
-						if (!v.state)
-							v.state = _.isEmpty(v.occupied_by) ? 'inactive' : 'active';
-						return v;
-					})
-					.groupBy('attached_to')
-					.value();
-				return Promise.props(_.mapValues(data, (org_data, org) => {
-					return this.setCache('workstations', [org], _.groupBy(org_data, 'device_type'));
-				}));
-			});
-	}
 
 	getOrganizationTree() {
 		return super.getGlobal('org_structure');

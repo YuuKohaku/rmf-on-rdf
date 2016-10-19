@@ -20,7 +20,7 @@ let TypeModel = require(base_dir + '/build/Classes/Atomic/BaseTypes/Ticket');
 
 class IrisBuilder {
 	static init(db, cfg) {
-		this.default_slot_size = _.get(cfg, 'default_slot_size', 15 * 3600);
+		this.default_slot_size = cfg && cfg.default_slot_size || 15 * 3600;
 		this.db = db;
 	}
 	static getResourceSource(DataProviderClass = CouchbirdDataProvider) {

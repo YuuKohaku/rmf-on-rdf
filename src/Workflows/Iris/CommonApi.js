@@ -29,7 +29,7 @@ class CommonApi extends IrisApi {
 		if (cached) return Promise.resolve(cached);
 		return this.db.get(cname)
 			.then((res) => {
-				let r = _.get(res, 'value.content', false);
+				let r = res && res.value && res.value.content || false;
 				if (r && !options.no_memcache) inmemory_cache.set(cname, r);
 				return r || {};
 			});
@@ -56,7 +56,7 @@ class CommonApi extends IrisApi {
 		if (cached) return Promise.resolve(cached);
 		return this.db.get(cname)
 			.then((res) => {
-				let r = _.get(res, 'value.content', false);
+				let r = res && res.value && res.value.content || false;
 				if (r) inmemory_cache.set(cname, r);
 				return r;
 			});
@@ -80,7 +80,7 @@ class CommonApi extends IrisApi {
 			return Promise.resolve(cached);
 		return this.db.get(cname)
 			.then((res) => {
-				let r = _.get(res, 'value.content', false);
+				let r = res && res.value && res.value.content || false;
 				if (r) inmemory_cache.set(cname, r);
 				return r;
 			});
@@ -103,7 +103,7 @@ class CommonApi extends IrisApi {
 		if (cached) return Promise.resolve(cached);
 		return this.db.get(cname)
 			.then((res) => {
-				let r = _.get(res, 'value.content', false);
+				let r = res && res.value && res.value.content || false;
 				if (r) inmemory_cache.set(cname, r);
 				return r || [];
 			});
