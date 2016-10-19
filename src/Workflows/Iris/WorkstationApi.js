@@ -29,7 +29,8 @@ class WorkstationApi extends CommonApi {
 
 	getWorkstationsCache(org) {
 		return super.getRegistry('workstation', [org])
-			.then(registry => Promise.props(_.mapValues(registry, (ids) => this.getEntryTypeless(ids))));
+			.then(registry => Promise.props(_.mapValues(registry, (ids) => this.getEntryTypeless(ids)
+				.then(_.values))));
 	}
 
 
