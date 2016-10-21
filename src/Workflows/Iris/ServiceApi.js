@@ -15,6 +15,7 @@ class ServiceApi extends CommonApi {
 
 	initContent() {
 		super.initContent('Service');
+		super.initContent('GlobalService');
 		super.initContent('ServiceGroup');
 		return this;
 	}
