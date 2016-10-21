@@ -29,11 +29,11 @@ class ServiceApi extends CommonApi {
 			.then((res) => (res.value.content));
 	}
 
-	getServiceIds() {
-		return super.getRegistry('service');
+	getServiceIds(org) {
+		return super.getRegistry('service', [org]);
 	}
 
-	updateServiceIds(data) {
+	computedServiceIds(data) {
 		return this.getGlobal("membership_description")
 			.then((res) => {
 				let keys = _.map(res, 'member');
@@ -47,7 +47,7 @@ class ServiceApi extends CommonApi {
 					.compact()
 					.uniq()
 					.value();
-				return super.setRegistry('service', data);
+				return data;
 			});
 	}
 
