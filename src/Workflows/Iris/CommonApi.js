@@ -156,7 +156,7 @@ class CommonApi extends IrisApi {
 	initContent(ModelName) {
 		let dp = new CouchbirdDataProvider(this.db);
 		let Model = getModel.dataType(ModelName);
-		let snake_model = _.snakeCase(ModelName);
+		let snake_model = _.kebabCase(ModelName);
 		let storage_accessor = new LDAccessor(dp);
 
 		storage_accessor

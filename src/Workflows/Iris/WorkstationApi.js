@@ -18,6 +18,7 @@ class WorkstationApi extends CommonApi {
 		super.initContent('Terminal');
 		super.initContent('Roomdisplay');
 		super.initContent('DigitalDisplay');
+		super.initContent('OperatorDisplay');
 		super.initContent('Qa');
 		super.initContent('Administrator');
 
