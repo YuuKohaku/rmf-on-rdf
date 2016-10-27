@@ -52,13 +52,11 @@ module.exports = {
 			out_keys: (servs) => {
 				let schedules = {};
 				_.map(servs, s => {
-					let l, sc = s && s.value && s.value.has_schedule && s.value.has_schedule[query.method];
-					if (sc) {
+					let sc = s && s.value && s.value.has_schedule && s.value.has_schedule[query.method] || [],
 						l = sc.length;
-						while (l--) {
-							if (!schedules[sc[l]])
-								schedules[sc[l]] = true;
-						}
+					while (l--) {
+						if (!schedules[sc[l]])
+							schedules[sc[l]] = true;
 					}
 				});
 				return Object.keys(schedules);
