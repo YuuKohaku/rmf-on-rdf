@@ -25,7 +25,7 @@ module.exports = {
 				let srv = {},
 					l, service;
 				_.map(ops, op => {
-					if (op && op.value) {
+					if (op && op.value && op.value.provides) {
 						l = op.value.provides.length;
 						while (l--) {
 							service = op.value.provides[l];
