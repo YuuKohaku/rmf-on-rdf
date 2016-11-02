@@ -188,7 +188,7 @@ class Plan extends BasicVolume {
 				plan.build([item]);
 
 				result.push(plan);
-				counter += 1;
+				counter++;
 				if (counter == count) return false;
 			});
 			if (counter == count) return false;

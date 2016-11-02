@@ -36,8 +36,8 @@ class TSFactoryDataProvider {
 
 	getSource(sources, query) {
 		let picker = {
-			operator: _.castArray(_.get(query, ['locked_fields', 'operator'], false) || query.actor_type == 'operator' && query.actor || '*'),
-			destination: _.castArray(_.get(query, ['locked_fields', 'destination'], false) || query.actor_type == 'destination' && query.actor || '*')
+			operator: _.castArray((query && query.locked_fields && query.locked_fields.operator || false) || query.actor_type == 'operator' && query.actor || '*'),
+			destination: _.castArray((query && query.locked_fields && query.locked_fields.destination || false) || query.actor_type == 'destination' && query.actor || '*')
 		};
 		let pick = _.map(picker, (val, prop_key) => {
 			return (mark_val) => {
@@ -180,16 +180,16 @@ class TSFactoryDataProvider {
 		// 	.inspect(params, {
 		// 		depth: null
 		// 	}));
-		// time = process.hrtime();
+		time = process.hrtime();
 		return this.placeExisting(params)
 			.then(({
 				remains,
 				placed,
 				lost
 			}) => {
-				// let diff = process.hrtime(time);
-				// console.log("PLACE EXISTING IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
-				// time = process.hrtime();
+				let diff = process.hrtime(time);
+				console.log("PLACE EXISTING IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
+				time = process.hrtime();
 
 				// console.log("PLACED OLD", require('util')
 				// 	.inspect(placed, {
@@ -227,15 +227,15 @@ class TSFactoryDataProvider {
 						ticket_data.push(t);
 					}
 				});
-				// diff = process.hrtime(time);
-				// console.log("TICKS DATA PREPARED IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
-				// time = process.hrtime();
+				diff = process.hrtime(time);
+				console.log("TICKS DATA PREPARED IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
+				time = process.hrtime();
 
 				let new_tickets = this.finalizer(ticket_data);
 
-				// diff = process.hrtime(time);
-				// console.log("FINALIZED IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
-				// time = process.hrtime();
+				diff = process.hrtime(time);
+				console.log("FINALIZED IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
+				time = process.hrtime();
 
 				let {
 					placed: placed_new,
@@ -251,9 +251,9 @@ class TSFactoryDataProvider {
 				// 		depth: null
 				// 	}));
 
-				// diff = process.hrtime(time);
-				// console.log("PLACE NEW IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
-				// time = process.hrtime();
+				diff = process.hrtime(time);
+				console.log("PLACE NEW IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
+				time = process.hrtime();
 
 				let result = [],
 					len = placed_new.length;
@@ -369,28 +369,28 @@ class TSFactoryDataProvider {
 				let all_lost = lost_new || [];
 				let srv = _.map(all_placed, 'service')
 					.concat(_.map(new_tickets, 'service'))
-				console.log("REMAINS", require('util')
-					.inspect(_.mapValues(remains, r => _.pick(r, srv)), {
-						depth: null
-					}));
-				console.log("LOST NEW", require('util')
-					.inspect(lost_new, {
-						depth: null
-					}));
-				console.log("PLACED_NEW", require('util')
-					.inspect(placed_new, {
-						depth: null
-					}));
-				console.log("LOST", require('util')
-					.inspect(lost, {
-						depth: null
-					}));
-				console.log("PLACED", require('util')
-					.inspect(placed, {
-						depth: null
-					}));
-				//feeling ashamed
-				//@FIXIT
+					// console.log("REMAINS", require('util')
+					// 	.inspect(_.mapValues(remains, r => _.pick(r, srv)), {
+					// 		depth: null
+					// 	}));
+					// console.log("LOST NEW", require('util')
+					// 	.inspect(lost_new, {
+					// 		depth: null
+					// 	}));
+					// console.log("PLACED_NEW", require('util')
+					// 	.inspect(placed_new, {
+					// 		depth: null
+					// 	}));
+					// console.log("LOST", require('util')
+					// 	.inspect(lost, {
+					// 		depth: null
+					// 	}));
+					// console.log("PLACED", require('util')
+					// 	.inspect(placed, {
+					// 		depth: null
+					// 	}));
+					//feeling ashamed
+					//@FIXIT
 				let stats;
 				// console.log("STATS____________________________________________________________________________________________________________");
 				// let time = process.hrtime();
@@ -400,7 +400,7 @@ class TSFactoryDataProvider {
 
 					stats = _.reduce(services, (acc, service) => {
 						let plans = _.map(remains_new, (op_plans, op_id) => {
-							let p = _.get(op_plans, `${service}`, false);
+							let p = (op_plans[service] || false);
 							return p ? p.parent.intersection(p)
 								.defragment() : p;
 						});
@@ -414,7 +414,7 @@ class TSFactoryDataProvider {
 						}, 0);
 						let max_available = {};
 						max_available[method] = _.reduce(remains_new, (acc, op_plans, op_id) => {
-							let plan = _.get(op_plans, `${ service }`, false);
+							let plan = (op_plans[service] || false);
 							return plan ? acc + plan.getLength() : acc;
 						}, 0);
 						let reserved = _.reduce(all_placed, (acc, tick) => {
@@ -452,7 +452,7 @@ class TSFactoryDataProvider {
 				// console.log('TSFDP QUOTA IN %d seconds', diff[0] + diff[1] / 1e9, method, params.quota_status);
 				// time = process.hrtime();
 				let placed_final;
-				lost = _.filter(lost, r => r.booking_method != "prebook");
+				lost = _.filter(lost, r => (r.booking_method != "prebook" && r.state != "postponed"));
 				if (lost.length > 0) {
 					all_lost = all_lost.concat(placed_new);
 					placed_final = [];

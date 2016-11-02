@@ -53,18 +53,18 @@ class BaseCollection {
 	}
 
 	// TEMPORARY COMMON METHOD SECTION
-	observe(...args){
+	observe(...args) {
 		return this.collectionMethod('observe', ...args);
 	}
 
-	reserve(...args){
+	reserve(...args) {
 		return this.collectionMethod('reserve', ...args);
 	}
 
-	free(...args){
-		return this.collectionMethod('free', ...args);
-	}
-	// END TEMPORARY COMMON METHOD SECTION
+	free(...args) {
+			return this.collectionMethod('free', ...args);
+		}
+		// END TEMPORARY COMMON METHOD SECTION
 
 	collectionMethod(method_name, passed) {
 		// console.log("COLLECTION METHOD", method_name, passed, this.collection_id);
@@ -78,7 +78,7 @@ class BaseCollection {
 			let to = ids.to;
 			let prefix = ids.prefix || '';
 			ids = [];
-			for (let i = from; i >= to; i += 1) {
+			for (var i = from; i >= to; i++) {
 				id.push(prefix + i);
 			}
 		} else {

@@ -14,7 +14,7 @@ class TimeChunk extends PrimitiveVolume {
 			[-Infinity, Infinity]
 		];
 
-		if(_.isArray(description)) {
+		if (_.isArray(description)) {
 			[
 				[this.start, this.end]
 			] = description.length ? description : this.default;
@@ -38,7 +38,7 @@ class TimeChunk extends PrimitiveVolume {
 		var end = _.min([this.end, chunk.end]);
 		var state = this.getState();
 
-		if(start >= end) return false;
+		if (start >= end) return false;
 
 		return new TimeChunk([
 			[start, end]
@@ -56,12 +56,12 @@ class TimeChunk extends PrimitiveVolume {
 	split(size) {
 		var length = this.getLength();
 
-		if(size > length) return [];
+		if (size > length) return [];
 
 		var count = length / size | 0;
 		var result = [];
 
-		for(var i = 0; i < count; i += 1) {
+		for (var i = 0; i < count; i++) {
 			result.push(new TimeChunk([
 				[this.start + i * size, this.start + (i + 1) * size]
 			]));
@@ -72,14 +72,14 @@ class TimeChunk extends PrimitiveVolume {
 	cut(chunk) {
 		var result = [];
 
-		if(_.inRange(chunk.start, this.start, this.end) && chunk.start > this.start) {
+		if (_.inRange(chunk.start, this.start, this.end) && chunk.start > this.start) {
 			var first = new TimeChunk([
 				[this.start, chunk.start]
 			], this.state);
 			result.push(first);
 		}
 
-		if(_.inRange(chunk.end, this.start, this.end)) {
+		if (_.inRange(chunk.end, this.start, this.end)) {
 			var second = new TimeChunk([
 				[chunk.end, this.end]
 			], this.state);
@@ -88,7 +88,7 @@ class TimeChunk extends PrimitiveVolume {
 		return result;
 	}
 	union(chunk) {
-		if(!this.intersectsWith(chunk)) return false;
+		if (!this.intersectsWith(chunk)) return false;
 		var start = _.min([this.start, chunk.start]);
 		var end = _.max([this.end, chunk.end]);
 
