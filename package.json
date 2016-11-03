@@ -35,7 +35,6 @@
 		"cbird-rdf": "git+https://github.com/YuuKohaku/cbird-rdf.git",
 		"harmony-reflect": ">=1.5.0",
 		"lodash": ">=4.16.2",
-		"iris-builder": "git+https://github.com/sdk-group/iris-builder.git",
 		"gulp-babel": "^6.1.2",
 		"node-uuid": ">=1.4.7"
 	},
