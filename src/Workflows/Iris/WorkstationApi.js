@@ -104,7 +104,8 @@ class WorkstationApi extends CommonApi {
 					};
 					let level = 1;
 					while (org.unit_of) {
-						acc[key][level] = org = orgs[org.unit_of];
+						org = orgs[org.unit_of];
+						acc[key][level] = org;
 						level++;
 					}
 					return acc;
