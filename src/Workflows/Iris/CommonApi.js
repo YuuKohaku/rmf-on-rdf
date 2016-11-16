@@ -13,6 +13,7 @@ let LDAccessor = require(base_dir + '/build/Classes/Atomic/Accessor/LDAccessor')
 //parent
 let IrisApi = require("./IrisApi");
 
+
 class CommonApi extends IrisApi {
 	constructor({
 		startpoint
@@ -30,7 +31,7 @@ class CommonApi extends IrisApi {
 		return this.db.get(cname)
 			.then((res) => {
 				let r = res && res.value && res.value.content || false;
-				if (r && !options.no_memcache) inmemory_cache.set(cname, r);
+				if (r && !options.no_memcache) inmemory_cache.set(cname, r, 21600);
 				return r || {};
 			});
 	}

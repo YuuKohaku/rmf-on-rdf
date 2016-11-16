@@ -303,6 +303,12 @@ class TSFactoryDataProvider {
 		// 	.inspect(new_tickets, {
 		// 		depth: null
 		// 	}));
+		if (params.nocheck) {
+			return Promise.props({
+				placed: this.storage_accessor.set(new_tickets)
+			});
+		}
+
 		if (params.reserve) {
 			let keys = _.map(new_tickets, 'id');
 			return this.storage_accessor.get({
@@ -339,11 +345,6 @@ class TSFactoryDataProvider {
 				});
 		}
 		///tick confirm
-		if (params.nocheck) {
-			return Promise.props({
-				placed: this.storage_accessor.set(new_tickets)
-			});
-		}
 		return this.placeExisting(params)
 			.then(({
 				remains,
