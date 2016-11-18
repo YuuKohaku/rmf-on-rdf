@@ -368,47 +368,21 @@ class TSFactoryDataProvider {
 				} = this.resolvePlacing(new_tickets, remains);
 				let all_placed = _.concat(placed, placed_new);
 				let all_lost = lost_new || [];
-				let srv = _.map(all_placed, 'service')
-					.concat(_.map(new_tickets, 'service'))
-					// console.log("REMAINS", require('util')
-					// 	.inspect(_.mapValues(remains, r => _.pick(r, srv)), {
-					// 		depth: null
-					// 	}));
-					// console.log("LOST NEW", require('util')
-					// 	.inspect(lost_new, {
-					// 		depth: null
-					// 	}));
-					// console.log("PLACED_NEW", require('util')
-					// 	.inspect(placed_new, {
-					// 		depth: null
-					// 	}));
-					// console.log("LOST", require('util')
-					// 	.inspect(lost, {
-					// 		depth: null
-					// 	}));
-					// console.log("PLACED", require('util')
-					// 	.inspect(placed, {
-					// 		depth: null
-					// 	}));
-					//feeling ashamed
-					//@FIXIT
-				let stats;
-				// console.log("STATS____________________________________________________________________________________________________________");
-				// let time = process.hrtime();
-				if (params.quota_status) {
-					let services = _.uniq(_.flatMap(remains_new, _.keys));
-					// console.log("SERV", _.size(services), params.selection.ldplan.dedicated_date.format("YYYY-MM-DD"));
 
+				//feeling ashamed
+				//@FIXIT
+				let stats;
+				let services = (params.quota_status) ? _.uniq(_.flatMap(remains_new, _.keys)) : _.map(all_placed, 'service')
+					.concat(_.map(new_tickets, 'service'));
+				// console.log("SERV", _.size(services), params.selection.ldplan.dedicated_date.format("YYYY-MM-DD"));
+				if (params.quota_status) {
 					stats = _.reduce(services, (acc, service) => {
 						let plans = _.map(remains_new, (op_plans, op_id) => {
 							let p = (op_plans[service] || false);
 							return p ? p.parent.intersection(p)
 								.defragment() : p;
 						});
-						// console.log("PLAN", require('util')
-						// 	.inspect(plans, {
-						// 		depth: null
-						// 	}));
+
 						let available = {};
 						available[method] = _.reduce(plans, (acc, plan) => {
 							return plan ? (acc + plan.getLength()) : acc;
@@ -444,17 +418,18 @@ class TSFactoryDataProvider {
 						_.set(acc, `${service}.${date}`, plan_stats);
 						return acc;
 					}, {});
-					// console.log("NEW", require('util')
-					// 	.inspect(stats, {
-					// 		depth: null
-					// 	}));
-				}
+				} else {}
+				// console.log("NEW", require('util')
+				// 	.inspect(stats, {
+				// 		depth: null
+				// 	}));
 				// let diff = process.hrtime(time);
 				// console.log('TSFDP QUOTA IN %d seconds', diff[0] + diff[1] / 1e9, method, params.quota_status);
 				// time = process.hrtime();
 				let placed_final;
-				lost = _.filter(lost, r => (r.booking_method != "prebook" && r.state != "postponed"));
-				if (lost.length > 0) {
+				// lost = _.filter(lost, r => (r.booking_method != "prebook" && r.state != "postponed"));
+				let fail = lost_new.length > 0;
+				if (fail) {
 					all_lost = all_lost.concat(placed_new);
 					placed_final = [];
 				} else {
