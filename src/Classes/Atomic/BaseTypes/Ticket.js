@@ -4,7 +4,7 @@ let DatabaseFieldset = require("./DatabaseFieldset");
 
 class Ticket extends DatabaseFieldset {
 	static get fields() {
-		return ["initial_time_description", "pack_member", "inheritance_counter", "inherits", "inheritance_level", 'session', 'locked_fields', 'booking_method', 'source', "qa_answers", 'time_description', 'operator', 'alt_operator', 'history', 'service', "code", "destination", 'org_destination', "booking_date", "dedicated_date", "priority", "state", "user_info", "service_count", "called", "expiry"];
+		return ["initial_time_description", "pack_member", "inheritance_counter", "inherits", "inheritance_level", 'session', 'locked_fields', 'booking_method', 'source', "qa_answers", 'time_description', 'operator', 'alt_operator', 'history', 'service', "code", "destination", 'org_destination', "booking_date", "dedicated_date", "priority", "state", "user_info", "user_info_description", "service_count", "called", "expiry"];
 	}
 
 	build(data) {
