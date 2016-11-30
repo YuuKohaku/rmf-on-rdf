@@ -2,6 +2,7 @@
 
 let AbstractDataProvider = require('./AbstractDataProvider.js');
 
+class TicketDataProvider extends AbstractDataProvider {
 	constructor(bucket, bus) {
 		super();
 		this._bucket = bucket;
@@ -96,3 +97,4 @@ let AbstractDataProvider = require('./AbstractDataProvider.js');
 	}
 }
 
+module.exports = TicketDataProvider;
