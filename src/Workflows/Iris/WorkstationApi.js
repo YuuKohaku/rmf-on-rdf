@@ -16,6 +16,7 @@ class WorkstationApi extends CommonApi {
 		super.initContent('PandoraBox');
 		super.initContent('ControlPanel');
 		super.initContent('Terminal');
+		super.initContent('Reception');
 		super.initContent('Roomdisplay');
 		super.initContent('DigitalDisplay');
 		super.initContent('OperatorDisplay');
