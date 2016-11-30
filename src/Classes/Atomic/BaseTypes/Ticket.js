@@ -24,6 +24,13 @@ class Ticket extends DatabaseFieldset {
 		return ["inherits", 'session', 'service', 'operator', 'alt_operator', 'destination', 'org_destination', 'source'];
 	}
 
+	static buildQuery(data) {
+		let today = data.today;
+		let db_data = super.buildQuery(data);
+		db_data.today = today;
+		return db_data;
+	}
+
 }
 
 module.exports = Ticket;

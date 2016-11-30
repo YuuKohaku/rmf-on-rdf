@@ -124,7 +124,8 @@ class IrisBuilder {
 					},
 					reserve: query.reserve || false,
 					nocheck: query.nocheck || false,
-					quota_status: query.quota_status
+					quota_status: query.quota_status,
+					today: query.today
 				};
 			})
 			.keymaker('get', (query) => {
@@ -144,7 +145,8 @@ class IrisBuilder {
 					},
 					services: query.services,
 					count: query.count || 1,
-					ticket_properties: query.ticket_properties
+					ticket_properties: query.ticket_properties,
+					today: query.today
 				};
 			});
 

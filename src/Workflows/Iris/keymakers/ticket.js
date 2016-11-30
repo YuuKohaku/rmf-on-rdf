@@ -12,7 +12,7 @@ module.exports = {
 		query,
 		keys
 	}) {
-		// console.log("QQT", query, keys);
+		console.log("QQT", query, keys);
 		if (keys && !query)
 			return {
 				keys
@@ -20,8 +20,20 @@ module.exports = {
 
 		if (!query)
 			return {};
+		let today = !!query.today;
+		_.unset(query, 'today');
 
 		_.unset(query, "@id");
+		_.unset(query, "@type");
+		if (today) {
+			return {
+				query: query,
+				options: {
+					today: true
+				}
+			};
+		}
+
 		//limbo starts here
 		if (query.dedicated_date) {
 			let chain = [];

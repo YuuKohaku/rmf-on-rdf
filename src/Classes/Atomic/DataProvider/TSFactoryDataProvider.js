@@ -150,6 +150,7 @@ class TSFactoryDataProvider {
 		let ticks;
 		return this.storage_accessor.get({
 				query: {
+					today: params.today,
 					dedicated_date: params.selection.ldplan.dedicated_date,
 					org_destination: params.selection.ldplan.organization,
 					state: ['registered', 'booked', 'called', 'postponed']
@@ -158,6 +159,7 @@ class TSFactoryDataProvider {
 			})
 			.then((tickets) => {
 				ticks = this.finalizer(_.values(tickets));
+				// console.log(">>>>>>>>>>>>>>>>>>>>>>\n\n\n", ticks);
 				// let diff = process.hrtime(time);
 				// console.log("PLACE EXISTING NULL IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
 				// time = process.hrtime();
@@ -176,10 +178,10 @@ class TSFactoryDataProvider {
 	}
 
 	get(params) {
-		// console.log("PARMAS", require('util')
-		// 	.inspect(params, {
-		// 		depth: null
-		// 	}));
+		console.log("PARMAS", require('util')
+			.inspect(params, {
+				depth: null
+			}));
 		time = process.hrtime();
 		return this.placeExisting(params)
 			.then(({
@@ -299,10 +301,10 @@ class TSFactoryDataProvider {
 
 	set(params, value) {
 		let new_tickets = this.finalizer(value);
-		// console.log("SETTING", params, require('util')
-		// 	.inspect(new_tickets, {
-		// 		depth: null
-		// 	}));
+		console.log("SETTING", params, require('util')
+			.inspect(new_tickets, {
+				depth: null
+			}));
 		if (params.nocheck) {
 			return Promise.props({
 				placed: this.storage_accessor.set(new_tickets)
