@@ -48,12 +48,13 @@ module.exports = {
 				// 	}));
 				let templates = {};
 				let day = query.dedicated_date.format('dddd');
-				let ops = _.keyBy(_.map(_.compact(res.ops), "value"), "@id");
-				let schedules = _.keyBy(_.map(res.schedules, "value"), "@id");
-				let reduced = _.reduce(ops, (acc, val, key) => {
+				let ops = _.map(_.compact(res.ops), "value");
+				let schedules = _.map(res.schedules, "value");
+				let reduced = _.reduce(ops, (acc, val) => {
+					let key = val['@id'];
 					let k = `${key}-${query.organization}-plan--${plan_id}`;
-					let sch = _.find(schedules, (sch, sch_id) => {
-						return !!~_.indexOf(_.castArray((val && val.has_schedule && val.has_schedule.resource || [])), sch_id) && (!!~_.indexOf(sch.has_day, day) || !!~_.indexOf(sch.has_day, '*'));
+					let sch = _.find(schedules, (sch) => {
+						return !!~_.indexOf(_.castArray((val && val.has_schedule && val.has_schedule.resource || [])), sch['@id']) && (!!~_.indexOf(sch.has_day, day) || !!~_.indexOf(sch.has_day, '*'));
 					});
 					if (!sch && query.allow_virtual) {
 						sch = {

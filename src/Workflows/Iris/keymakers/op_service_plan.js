@@ -68,19 +68,24 @@ module.exports = {
 			query: chain,
 			final: function (res) {
 				let day = query.dedicated_date.format('dddd');
-				let services = _.keyBy(_.map(res.services, "value"), "@id");
-				let all_services = _.keys(services);
-				let ops = _.keyBy(_.map(res.ops, "value"), "@id");
-				let schedules = _.keyBy(_.map(res.schedules, "value"), "@id");
-				let reduced = _.reduce(ops, (acc, val, key) => {
+				let all_services = [],
+					map = {};
+				let services = _.map(res.services, (srv, i) => {
+					all_services.push(srv.value['@id']);
+					map[srv.value['@id']] = i;
+					return srv.value;
+				});
+				let ops = _.map(res.ops, "value");
+				let schedules = _.map(res.schedules, "value");
+				let reduced = _.reduce(ops, (acc, val) => {
 					let provision = val.provides || [];
 					if (provision === '*') {
 						provision = all_services;
 					}
-					acc[key] = _.reduce(provision, (s_acc, s_id) => {
-						let sch = _.find(schedules, (sch, sch_id) => {
+					acc[val['@id']] = _.reduce(provision, (s_acc, s_id) => {
+						let sch = _.find(schedules, (sch) => {
 							// console.log("SCH", sch_id, services[s_id], s_id, key);
-							return services[s_id] && !!~_.indexOf(_.castArray(services[s_id].has_schedule && services[s_id].has_schedule[query.method] || []), sch_id) && !!~_.indexOf(sch.has_day, day);
+							return services[map[s_id]] && !!~_.indexOf(_.castArray(services[map[s_id]].has_schedule && services[map[s_id]].has_schedule[query.method] || []), sch['@id']) && !!~_.indexOf(sch.has_day, day);
 						});
 						if (sch) {
 							sch = _.cloneDeep(sch);
