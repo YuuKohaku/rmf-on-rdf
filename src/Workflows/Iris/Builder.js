@@ -119,13 +119,14 @@ class IrisBuilder {
 							time_description: query.time_description,
 							method: query.method || 'live',
 							allow_virtual: query.allow_virtual,
-							dedicated_date: query.dedicated_date
+							dedicated_date: query.dedicated_date,
+							no_service_check: !!query.no_service_check
 						}
 					},
-					reserve: query.reserve || false,
-					nocheck: query.nocheck || false,
+					reserve: !!query.reserve,
+					nocheck: !!query.nocheck,
 					quota_status: query.quota_status,
-					today: query.today
+					today: !!query.today
 				};
 			})
 			.keymaker('get', (query) => {
