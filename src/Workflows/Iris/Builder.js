@@ -119,8 +119,7 @@ class IrisBuilder {
 							time_description: query.time_description,
 							method: query.method || 'live',
 							allow_virtual: query.allow_virtual,
-							dedicated_date: query.dedicated_date,
-							no_service_check: !!query.no_service_check
+							dedicated_date: query.dedicated_date
 						}
 					},
 					reserve: !!query.reserve,

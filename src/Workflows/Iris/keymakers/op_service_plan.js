@@ -4,7 +4,7 @@ module.exports = {
 	get: function ({
 		query
 	}) {
-		console.log("QQ", query);
+		// console.log("QQ", query);
 		if (!query)
 			return {};
 		let s_in_keys;
@@ -79,7 +79,7 @@ module.exports = {
 				let schedules = _.map(res.schedules, "value");
 				let reduced = _.reduce(ops, (acc, val) => {
 					let provision = val.provides || [];
-					if (provision === '*' || query.no_service_check) {
+					if (provision === '*') {
 						provision = all_services;
 					}
 					acc[val['@id']] = _.reduce(provision, (s_acc, s_id) => {
