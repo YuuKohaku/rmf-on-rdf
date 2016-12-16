@@ -16,6 +16,7 @@ class Organization extends DatabaseFieldset {
 						"formatted_address",
 						"mkgu_code",
 						"qa_enabled",
+						"ignore_agent_state",
 						"auto_logout_time",
 						"auto_warmup_time",
 						"auto_expire_time",
