@@ -13,7 +13,9 @@ class Organization extends DatabaseFieldset {
 						"auto_expire_time",
 						"workstation_resource_enabled", "employee_resource_enabled",
 						 "workstation_filtering_enabled", "employee_filtering_enabled", "notification_levels",
-						"sound_theme", "max_slots_per_day", "live_priority_ordering"];
+						"sound_theme", "max_slots_per_day",
+						"live_priority_ordering",
+						"separate_prebook_ordering"];
 	}
 
 	static get references() {
