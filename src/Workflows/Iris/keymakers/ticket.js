@@ -12,7 +12,7 @@ module.exports = {
 		query,
 		keys
 	}) {
-		console.log("QQT", query, keys);
+		// console.log("QQT", query, keys);
 		if (keys && !query)
 			return {
 				keys

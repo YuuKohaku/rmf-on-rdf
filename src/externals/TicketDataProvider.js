@@ -14,7 +14,7 @@ class TicketDataProvider extends AbstractDataProvider {
 		query,
 		options
 	}) {
-		console.log("CBLDP GET", out_keys, query, options);
+		// console.log("CBLDP GET", out_keys, query, options);
 		if (query && options.today) {
 			return this._emitter.addTask("ticket-index", {
 				_action: "query-today-tickets",
