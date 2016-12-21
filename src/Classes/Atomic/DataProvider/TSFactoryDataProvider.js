@@ -392,8 +392,7 @@ class TSFactoryDataProvider {
 						let max_available = {};
 						max_available[method] = _.reduce(remains_new, (acc, op_plans, op_id) => {
 							let plan = (op_plans[service] || false);
-							return plan ? acc + (plan.parent || plan)
-								.getLength() : acc;
+							return plan ? acc + plan.getLength() : acc;
 						}, 0);
 						let reserved = _.reduce(all_placed, (acc, tick) => {
 							if (_.isArray(tick.time_description) && tick.service == service)
