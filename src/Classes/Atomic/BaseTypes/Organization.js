@@ -20,6 +20,7 @@ class Organization extends DatabaseFieldset {
 						"auto_logout_time",
 						"auto_warmup_time",
 						"auto_expire_time",
+						"available_slots_offset",
 						"workstation_resource_enabled", "employee_resource_enabled",
 						 "workstation_filtering_enabled", "employee_filtering_enabled", "notification_levels",
 						"sound_theme", "max_slots_per_day",
