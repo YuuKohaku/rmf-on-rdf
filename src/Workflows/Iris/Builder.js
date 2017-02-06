@@ -20,7 +20,7 @@ let TypeModel = require(base_dir + '/build/Classes/Atomic/BaseTypes/Ticket');
 
 class IrisBuilder {
 	static init(db, cfg) {
-		this.default_slot_size = _.get(cfg, 'default_slot_size', 15 * 3600);
+		this.default_slot_size = cfg && cfg.default_slot_size || 15 * 3600;
 		this.db = db;
 	}
 	static getResourceSource(DataProviderClass = CouchbirdDataProvider) {
@@ -122,9 +122,10 @@ class IrisBuilder {
 							dedicated_date: query.dedicated_date
 						}
 					},
-					reserve: query.reserve || false,
-					count: query.count,
-					quota_status: query.quota_status
+					reserve: !!query.reserve,
+					nocheck: !!query.nocheck,
+					quota_status: query.quota_status,
+					today: !!query.today
 				};
 			})
 			.keymaker('get', (query) => {
@@ -138,15 +139,14 @@ class IrisBuilder {
 							actor_keys: query.actor_keys,
 							time_description: query.time_description,
 							organization: query.organization,
-							service_count: query.service_count,
 							method: query.method || 'live',
 							dedicated_date: query.dedicated_date
 						}
 					},
 					services: query.services,
+					count: query.count || 1,
 					ticket_properties: query.ticket_properties,
-					count: query.count,
-					existing_only: !!query.existing_only
+					today: query.today
 				};
 			});
 
@@ -156,7 +156,7 @@ class IrisBuilder {
 		factory_provider
 			.addStorage(box_storage)
 			.addFinalizer((data) => {
-				let tickets = _.filter(data, _.isPlainObject);
+				let tickets = (data.constructor === Array) ? data : (data.tickets ? _.castArray(data.tickets) : []);
 				let res = _.map(tickets, (t_data) => {
 					return Model.buildSerialized(t_data);
 				});

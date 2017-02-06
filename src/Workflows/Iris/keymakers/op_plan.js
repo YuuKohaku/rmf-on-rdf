@@ -19,8 +19,17 @@ module.exports = {
 			transactional: true,
 			out_keys: (ops) => {
 				// console.log("OPS", ops);
-				let schedules = _.map(ops, (op) => _.get(op, `value.has_schedule.${query.method}`, []));
-				return _.uniq(_.flattenDeep(schedules));
+				let schedules = {};
+				_.map(ops, (op) => {
+					let sc = op && op.value && op.value.has_schedule && op.value.has_schedule[query.method] || [],
+						l = sc.length;
+					while (l--) {
+						if (!schedules[sc[l]])
+							schedules[sc[l]] = true;
+					}
+				});
+
+				return Object.keys(schedules);
 			}
 		});
 		let req = {
@@ -33,18 +42,18 @@ module.exports = {
 				// 		depth: null
 				// 	}));
 				let day = query.dedicated_date.format('dddd');
-				let ops = _.keyBy(_.map(res.ops, "value"), "@id");
-				let schedules = _.keyBy(_.map(res.schedules, "value"), "@id");
-				let reduced = _.reduce(ops, (acc, val, key) => {
+				let ops = _.map(res.ops, "value");
+				let schedules = _.map(res.schedules, "value");
+				let reduced = _.reduce(ops, (acc, val) => {
 					let sch = _.find(schedules, (sch, sch_id) => {
 						// console.log("SCH", sch_id, key, day, !!~_.indexOf(_.castArray(val.has_schedule[query.method]), sch_id, _.castArray(val.has_schedule[query.method])));
-						return !!~_.indexOf(_.castArray(_.get(val, ['has_schedule', query.method], [])), sch_id) && !!~_.indexOf(sch.has_day, day);
+						return !!~_.indexOf(_.castArray((val && val.has_schedule && val.has_schedule[query.method] || [])), sch['@id']) && !!~_.indexOf(sch.has_day, day);
 					});
 					if (sch) {
 						sch = _.cloneDeep(sch);
 						sch._mark = {};
-						sch._mark[query.actor_type] = key;
-						acc[key] = sch;
+						sch._mark[query.actor_type] = val['@id'];
+						acc[val['@id']] = sch;
 					}
 					return acc;
 				}, {});

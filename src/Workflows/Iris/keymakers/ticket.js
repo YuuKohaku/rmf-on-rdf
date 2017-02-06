@@ -20,8 +20,20 @@ module.exports = {
 
 		if (!query)
 			return {};
+		let today = !!query.today;
+		_.unset(query, 'today');
 
 		_.unset(query, "@id");
+		_.unset(query, "@type");
+		if (today) {
+			return {
+				query: query,
+				options: {
+					today: true
+				}
+			};
+		}
+
 		//limbo starts here
 		if (query.dedicated_date) {
 			let chain = [];
@@ -75,7 +87,7 @@ module.exports = {
 	},
 	set: (data) => {
 		// console.log("SETTING TICK", data);
-		if (_.every(data, (d) => !_.isUndefined(d["@id"]))) {
+		if (_.every(data, (d) => !_.isUndefined(d["@id"]) && d['@id'][d['@id'].length - 1] != '*')) {
 			let options = {};
 			let access = _.map(data, (item) => {
 				let entity = item;

@@ -16,8 +16,10 @@ class WorkstationApi extends CommonApi {
 		super.initContent('PandoraBox');
 		super.initContent('ControlPanel');
 		super.initContent('Terminal');
+		super.initContent('Reception');
 		super.initContent('Roomdisplay');
 		super.initContent('DigitalDisplay');
+		super.initContent('OperatorDisplay');
 		super.initContent('Qa');
 		super.initContent('Administrator');
 
@@ -28,41 +30,11 @@ class WorkstationApi extends CommonApi {
 	}
 
 	getWorkstationsCache(org) {
-		return super.getCache('workstations', [org]);
+		return super.getRegistry('workstation', [org])
+			.then(registry => Promise.props(_.mapValues(registry, (ids) => this.getEntryTypeless(ids)
+				.then(_.values))));
 	}
 
-	updateWorkstationsCache(organization, new_ws = []) {
-		let props = ['id', 'type', 'attached_to', 'short_label', 'occupied_by', 'device_type', 'provides', 'has_schedule', 'maintains', 'state'];
-		return Promise.map(_.castArray(organization), org => this.getWorkstationsCache(org))
-			.then(res => {
-				let keys = _(res)
-					.map(_.values)
-					.flattenDeep()
-					.map('id')
-					.concat(new_ws)
-					.uniq()
-					.compact()
-					.value();
-				return this.getEntryTypeless(keys);
-			})
-			.then(res => {
-				let data = _(res)
-					.values()
-					.compact()
-					.map(v => _.pick(v, props))
-					.map(v => {
-						v.occupied_by = _.compact(v.occupied_by);
-						if (!v.state)
-							v.state = _.isEmpty(v.occupied_by) ? 'inactive' : 'active';
-						return v;
-					})
-					.groupBy('attached_to')
-					.value();
-				return Promise.props(_.mapValues(data, (org_data, org) => {
-					return this.setCache('workstations', [org], _.groupBy(org_data, 'device_type'));
-				}));
-			});
-	}
 
 	getOrganizationTree() {
 		return super.getGlobal('org_structure');
@@ -127,14 +99,14 @@ class WorkstationApi extends CommonApi {
 					.value();
 				if (!org_key) org_keys = _.compact(_.keys(orgs));
 				return _.reduce(org_keys, (acc, key) => {
-					console.log("ORGKEYS", key, org_keys);
 					let org = orgs[key];
 					acc[key] = {
 						'0': org
 					};
 					let level = 1;
 					while (org.unit_of) {
-						acc[key][level] = org = orgs[org.unit_of];
+						org = orgs[org.unit_of];
+						acc[key][level] = org;
 						level++;
 					}
 					return acc;
@@ -143,6 +115,7 @@ class WorkstationApi extends CommonApi {
 	}
 
 	getWorkstationOrganizationSchedulesChain(org_key) {
+
 		let prov;
 		let time = process.hrtime();
 		return this.getWorkstationOrganizationChain(org_key)

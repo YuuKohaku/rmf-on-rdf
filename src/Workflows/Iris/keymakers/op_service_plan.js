@@ -21,10 +21,21 @@ module.exports = {
 			s_out_keys = (ops) => {
 				let mask = ops[query.service_keys] || [];
 				_.unset(ops, query.service_keys);
-				// console.log("SERVICES", _.intersection(_.flatMap(ops, "value.provides"), _.get(mask, "value.content", [])));
-				let msk = _.get(mask, "value.content", false) || mask || [];
-				let op_srvs = _.uniq(_.compact(_.flatMap(ops, (op) => (_.get(op, ['value', 'provides'], false) || msk))));
-				return _.intersection(op_srvs, msk);
+				let msk = (mask.value && mask.value.content) || mask || [];
+				let srv = {},
+					l, service;
+				_.map(ops, op => {
+					if (op && op.value && op.value.provides) {
+						l = op.value.provides.length;
+						while (l--) {
+							service = op.value.provides[l];
+							if (!srv[service])
+								srv[service] = true;
+						}
+					}
+
+				});
+				return srv['*'] ? msk : _.intersection(Object.keys(srv), msk);
 			};
 		} else {
 			s_in_keys = _.castArray(query.service);
@@ -39,8 +50,16 @@ module.exports = {
 			name: "schedules",
 			transactional: true,
 			out_keys: (servs) => {
-				let schedules = _.map(servs, `value.has_schedule.${query.method}`);
-				return _.uniq(_.flattenDeep(schedules));
+				let schedules = {};
+				_.map(servs, s => {
+					let sc = s && s.value && s.value.has_schedule && s.value.has_schedule[query.method] || [],
+						l = sc.length;
+					while (l--) {
+						if (!schedules[sc[l]])
+							schedules[sc[l]] = true;
+					}
+				});
+				return Object.keys(schedules);
 			}
 		});
 		let req = {
@@ -49,19 +68,24 @@ module.exports = {
 			query: chain,
 			final: function (res) {
 				let day = query.dedicated_date.format('dddd');
-				let services = _.keyBy(_.map(res.services, "value"), "@id");
-				let all_services = _.keys(services);
-				let ops = _.keyBy(_.map(res.ops, "value"), "@id");
-				let schedules = _.keyBy(_.map(res.schedules, "value"), "@id");
-				let reduced = _.reduce(ops, (acc, val, key) => {
+				let all_services = [],
+					map = {};
+				let services = _.map(res.services, (srv, i) => {
+					all_services.push(srv.value['@id']);
+					map[srv.value['@id']] = i;
+					return srv.value;
+				});
+				let ops = _.map(res.ops, "value");
+				let schedules = _.map(res.schedules, "value");
+				let reduced = _.reduce(ops, (acc, val) => {
 					let provision = val.provides || [];
-					if (!!~_.indexOf(provision, '*')) {
+					if (provision === '*') {
 						provision = all_services;
 					}
-					acc[key] = _.reduce(provision, (s_acc, s_id) => {
-						let sch = _.find(schedules, (sch, sch_id) => {
+					acc[val['@id']] = _.reduce(provision, (s_acc, s_id) => {
+						let sch = _.find(schedules, (sch) => {
 							// console.log("SCH", sch_id, services[s_id], s_id, key);
-							return services[s_id] && !!~_.indexOf(_.castArray(_.get(services, [s_id, 'has_schedule', query.method], [])), sch_id) && !!~_.indexOf(sch.has_day, day);
+							return services[map[s_id]] && !!~_.indexOf(_.castArray(services[map[s_id]].has_schedule && services[map[s_id]].has_schedule[query.method] || []), sch['@id']) && !!~_.indexOf(sch.has_day, day);
 						});
 						if (sch) {
 							sch = _.cloneDeep(sch);

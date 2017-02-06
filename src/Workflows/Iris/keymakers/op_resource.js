@@ -18,12 +18,22 @@ module.exports = {
 		chain.push({
 			name: "schedules",
 			out_keys: (ops) => {
-				let schedules = _.map(ops, (op) => {
-					if (!op) return [];
-					let keys = op.value && op.value.has_schedule ? _.castArray(op.value.has_schedule.resource) : [];
-					return _.concat(keys, `${op.value["@id"]}-${query.organization}-plan--${plan_id}`);
+				let schedules = {};
+				_.map(ops, (op) => {
+					if (!op)
+						return;
+					let sc = op.value && op.value.has_schedule && op.value.has_schedule.resource || [];
+					if (sc.constructor !== Array)
+						sc = [sc];
+					let l = sc.length;
+					while (l--) {
+						if (!schedules[sc[l]]) {
+							schedules[sc[l]] = true;
+						}
+					}
+					schedules[`${op.value["@id"]}-${query.organization}-plan--${plan_id}`] = true;
 				});
-				return _.uniq(_.flattenDeep(schedules));
+				return Object.keys(schedules);
 			}
 		});
 
@@ -38,12 +48,13 @@ module.exports = {
 				// 	}));
 				let templates = {};
 				let day = query.dedicated_date.format('dddd');
-				let ops = _.keyBy(_.map(_.compact(res.ops), "value"), "@id");
-				let schedules = _.keyBy(_.map(res.schedules, "value"), "@id");
-				let reduced = _.reduce(ops, (acc, val, key) => {
+				let ops = _.map(_.compact(res.ops), "value");
+				let schedules = _.map(res.schedules, "value");
+				let reduced = _.reduce(ops, (acc, val) => {
+					let key = val['@id'];
 					let k = `${key}-${query.organization}-plan--${plan_id}`;
-					let sch = _.find(schedules, (sch, sch_id) => {
-						return !!~_.indexOf(_.castArray(_.get(val, ['has_schedule', 'resource'], [])), sch_id) && (!!~_.indexOf(sch.has_day, day) || !!~_.indexOf(sch.has_day, '*'));
+					let sch = _.find(schedules, (sch) => {
+						return !!~_.indexOf(_.castArray((val && val.has_schedule && val.has_schedule.resource || [])), sch['@id']) && (!!~_.indexOf(sch.has_day, day) || !!~_.indexOf(sch.has_day, '*'));
 					});
 					if (!sch && query.allow_virtual) {
 						sch = {

@@ -13,6 +13,7 @@ let LDAccessor = require(base_dir + '/build/Classes/Atomic/Accessor/LDAccessor')
 //parent
 let IrisApi = require("./IrisApi");
 
+
 class CommonApi extends IrisApi {
 	constructor({
 		startpoint
@@ -26,10 +27,11 @@ class CommonApi extends IrisApi {
 	getCache(name, params = [], options = {}) {
 		let cname = this.getSystemName('cache', name, params);
 		let cached = inmemory_cache.get(cname);
-		return cached && Promise.resolve(cached) || this.db.get(cname)
+		if (cached) return Promise.resolve(cached);
+		return this.db.get(cname)
 			.then((res) => {
-				let r = _.get(res, 'value.content', false);
-				r && !options.no_memcache && inmemory_cache.set(cname, r);
+				let r = res && res.value && res.value.content || false;
+				if (r && !options.no_memcache) inmemory_cache.set(cname, r, 21600);
 				return r || {};
 			});
 	}
@@ -52,10 +54,11 @@ class CommonApi extends IrisApi {
 	getLookup(name, params = []) {
 		let cname = this.getSystemName('lookup', name, params);
 		let cached = inmemory_cache.get(cname);
-		return cached && Promise.resolve(cached) || this.db.get(cname)
+		if (cached) return Promise.resolve(cached);
+		return this.db.get(cname)
 			.then((res) => {
-				let r = _.get(res, 'value.content', false);
-				r && inmemory_cache.set(cname, r);
+				let r = res && res.value && res.value.content || false;
+				if (r) inmemory_cache.set(cname, r);
 				return r;
 			});
 	}
@@ -74,10 +77,11 @@ class CommonApi extends IrisApi {
 	getGlobal(name, params = []) {
 		let cname = this.getSystemName('global', name, params);
 		let cached = inmemory_cache.get(cname);
-		return cached && Promise.resolve(cached) || this.db.get(cname)
+		if (cached) return Promise.resolve(cached);
+		return this.db.get(cname)
 			.then((res) => {
-				let r = _.get(res, 'value.content', false);
-				r && inmemory_cache.set(cname, r);
+				let r = res && res.value && res.value.content || false;
+				if (r) inmemory_cache.set(cname, r);
 				return r;
 			});
 	}
@@ -95,18 +99,19 @@ class CommonApi extends IrisApi {
 
 	getRegistry(name, params = []) {
 		let cname = this.getSystemName('registry', name, params);
-		let cached = inmemory_cache.get(cname);
-		return cached && Promise.resolve(cached) || this.db.get(cname)
+		// let cached = inmemory_cache.get(cname);
+		// if (cached) return Promise.resolve(cached);
+		return this.db.get(cname)
 			.then((res) => {
-				let r = _.get(res, 'value.content', false);
-				r && inmemory_cache.set(cname, r);
+				let r = res && res.value && res.value.content || false;
+				// if (r) inmemory_cache.set(cname, r);
 				return r || [];
 			});
 	}
 
 	setRegistry(name, params = [], data) {
 		let cname = this.getSystemName('registry', name, params);
-		inmemory_cache.set(cname, data);
+		// inmemory_cache.set(cname, data);
 		return this.db.upsert(cname, {
 			"@id": cname,
 			"@content_type": _.upperFirst(_.camelCase(name)),
@@ -152,7 +157,7 @@ class CommonApi extends IrisApi {
 	initContent(ModelName) {
 		let dp = new CouchbirdDataProvider(this.db);
 		let Model = getModel.dataType(ModelName);
-		let snake_model = _.snakeCase(ModelName);
+		let snake_model = _.kebabCase(ModelName);
 		let storage_accessor = new LDAccessor(dp);
 
 		storage_accessor

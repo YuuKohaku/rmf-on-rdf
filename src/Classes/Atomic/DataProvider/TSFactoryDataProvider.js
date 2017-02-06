@@ -36,8 +36,8 @@ class TSFactoryDataProvider {
 
 	getSource(sources, query) {
 		let picker = {
-			operator: _.castArray(_.get(query, ['locked_fields', 'operator'], false) || query.actor_type == 'operator' && query.actor || '*'),
-			destination: _.castArray(_.get(query, ['locked_fields', 'destination'], false) || query.actor_type == 'destination' && query.actor || '*')
+			operator: _.castArray((query && query.locked_fields && query.locked_fields.operator || false) || query.actor_type == 'operator' && query.actor || '*'),
+			destination: _.castArray((query && query.locked_fields && query.locked_fields.destination || false) || query.actor_type == 'destination' && query.actor || '*')
 		};
 		let pick = _.map(picker, (val, prop_key) => {
 			return (mark_val) => {
@@ -146,41 +146,42 @@ class TSFactoryDataProvider {
 
 
 	placeExisting(params) {
-		let time = process.hrtime();
-		return Promise.props({
-				space: Promise.props(_.reduce(this.ingredients, (result, ingredient, property) => {
+		// let time = process.hrtime();
+		let ticks;
+		return this.storage_accessor.get({
+				query: {
+					today: params.today,
+					dedicated_date: params.selection.ldplan.dedicated_date,
+					org_destination: params.selection.ldplan.organization,
+					state: ['registered', 'booked', 'called', 'postponed']
+				},
+				options: {}
+			})
+			.then((tickets) => {
+				ticks = this.finalizer(_.values(tickets));
+				// console.log(">>>>>>>>>>>>>>>>>>>>>>\n\n\n", ticks);
+				// let diff = process.hrtime(time);
+				// console.log("PLACE EXISTING NULL IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
+				// time = process.hrtime();
+
+				return Promise.props(_.reduce(this.ingredients, (result, ingredient, property) => {
 					result[property] = ingredient.get(params);
 					return result;
-				}, {})),
-				tickets: this.storage_accessor.get({
-					query: {
-						dedicated_date: params.selection.ldplan.dedicated_date,
-						org_destination: params.selection.ldplan.organization,
-						state: ['registered', 'booked', 'called', 'postponed']
-					},
-					options: {}
-				})
+				}, {}));
 			})
 			.then(({
-				space: {
-					ldplan: plans
-				},
-				tickets
+				ldplan: plans
 			}) => {
-				let diff = process.hrtime(time);
-				// console.log("PLACE EXISTING NULL IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
-				time = process.hrtime();
-
 				// console.log("EXISTING TICKS", tickets , this.finalizer(_.values(tickets)));
-				return this.resolvePlacing(this.finalizer(_.values(tickets)), plans, true);
+				return this.resolvePlacing(ticks, plans, true);
 			});
 	}
 
 	get(params) {
-		// console.log("PARMAS", require('util')
-		// 	.inspect(params, {
-		// 		depth: null
-		// 	}));
+		console.log("PARMAS", require('util')
+			.inspect(params, {
+				depth: null
+			}));
 		time = process.hrtime();
 		return this.placeExisting(params)
 			.then(({
@@ -189,7 +190,7 @@ class TSFactoryDataProvider {
 				lost
 			}) => {
 				let diff = process.hrtime(time);
-				// console.log("PLACE EXISTING IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
+				console.log("PLACE EXISTING IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
 				time = process.hrtime();
 
 				// console.log("PLACED OLD", require('util')
@@ -205,38 +206,37 @@ class TSFactoryDataProvider {
 					return _.isArray(tick.time_description) && (tick.time_description[0] < td[0] || tick.time_description[1] > td[1]);
 				});
 				let ticket_data = [];
-				if (!_.isEmpty(lost)) {
-					//		console.log("-------------------------------------------------------------------------------------------------------");
-					//		console.log("LOST", lost);
-					//		console.log("-------------------------------------------------------------------------------------------------------");
-				}
-				if (params.existing_only)
-					return placed;
+				// if (!_.isEmpty(lost)) {
+				// 	console.log("-------------------------------------------------------------------------------------------------------");
+				// 	console.log("LOST", lost);
+				// 	console.log("-------------------------------------------------------------------------------------------------------");
+				// }
 
 				_.map(params.services, ({
 					service: s_id,
-					time_description
+					time_description,
+					service_count
 				}) => {
-					for (let i = 0; i < params.count; i++) {
+					var i = 0;
+					for (i = 0; i < params.count; i++) {
 						let t = {
 							time_description,
 							dedicated_date: params.selection.ldplan.dedicated_date,
 							service: s_id,
-							service_count: _.parseInt(params.selection.ldplan.service_count)
+							service_count: _.parseInt(service_count)
 						};
 						_.merge(t, params.ticket_properties);
 						ticket_data.push(t);
 					}
 				});
-
 				diff = process.hrtime(time);
-				// console.log("TICKS DATA PREPARED IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
+				console.log("TICKS DATA PREPARED IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
 				time = process.hrtime();
 
 				let new_tickets = this.finalizer(ticket_data);
 
 				diff = process.hrtime(time);
-				// console.log("FINALIZED IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
+				console.log("FINALIZED IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
 				time = process.hrtime();
 
 				let {
@@ -245,15 +245,31 @@ class TSFactoryDataProvider {
 					remains: remains_new
 				} = this.resolvePlacing(new_tickets, remains, true);
 				// console.log("NEW TICKS PLACED", require('util')
-				// 	.inspect(remains_new, {
+				// 	.inspect(placed_new, {
+				// 		depth: null
+				// 	}));
+				// console.log("NEW TICKS LOST", require('util')
+				// 	.inspect(lost_new, {
 				// 		depth: null
 				// 	}));
 
 				diff = process.hrtime(time);
-				// console.log("PLACE NEW IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
+				console.log("PLACE NEW IN %d msec", (diff[0] * 1e9 + diff[1]) / 1000000);
 				time = process.hrtime();
 
-				return placed_new;
+				let result = [],
+					len = placed_new.length;
+				while (len--) {
+					placed_new[len].success = true;
+					result.push(placed_new[len]);
+				}
+
+				len = lost_new.length;
+				while (len--) {
+					lost_new[len].success = false;
+					result.push(lost_new[len]);
+				}
+				return result;
 			});
 
 	}
@@ -285,10 +301,16 @@ class TSFactoryDataProvider {
 
 	set(params, value) {
 		let new_tickets = this.finalizer(value);
-		// console.log("SETTING", params, require('util')
-		// 	.inspect(new_tickets, {
-		// 		depth: null
-		// 	}));
+		console.log("SETTING", params, require('util')
+			.inspect(new_tickets, {
+				depth: null
+			}));
+		if (params.nocheck) {
+			return Promise.props({
+				placed: this.storage_accessor.set(new_tickets)
+			});
+		}
+
 		if (params.reserve) {
 			let keys = _.map(new_tickets, 'id');
 			return this.storage_accessor.get({
@@ -341,46 +363,35 @@ class TSFactoryDataProvider {
 				});
 				// console.log("NEWTICKS", new_tickets, lost_old);
 
-				let old_placed = _.isEmpty(lost_old);
-				if (!_.isEmpty(lost)) {
-					//		console.log("-------------------------------------------------------------------------------------------------------");
-					//	console.log("LOST", lost);
-					//		console.log("-------------------------------------------------------------------------------------------------------");
-				}
 				let {
 					placed: placed_new,
 					lost: lost_new,
 					remains: remains_new
 				} = this.resolvePlacing(new_tickets, remains);
 				let all_placed = _.concat(placed, placed_new);
-				let all_lost = lost_new;
+				let all_lost = lost_new || [];
 
 				//feeling ashamed
 				//@FIXIT
 				let stats;
-				// console.log("STATS____________________________________________________________________________________________________________");
-				let time = process.hrtime();
+				let services = (params.quota_status) ? _.uniq(_.flatMap(remains_new, _.keys)) : _.map(all_placed, 'service')
+					.concat(_.map(new_tickets, 'service'));
+				// console.log("SERV", _.size(services), params.selection.ldplan.dedicated_date.format("YYYY-MM-DD"));
 				if (params.quota_status) {
-					let services = _.uniq(_.flatMap(remains_new, _.keys));
-					// console.log("SERV", _.size(services), params.selection.ldplan.dedicated_date.format("YYYY-MM-DD"));
-
 					stats = _.reduce(services, (acc, service) => {
 						let plans = _.map(remains_new, (op_plans, op_id) => {
-							let p = _.get(op_plans, `${service}`, false);
+							let p = (op_plans[service] || false);
 							return p ? p.parent.intersection(p)
 								.defragment() : p;
 						});
-						// console.log("PLAN", require('util')
-						// 	.inspect(plans, {
-						// 		depth: null
-						// 	}));
+
 						let available = {};
 						available[method] = _.reduce(plans, (acc, plan) => {
 							return plan ? (acc + plan.getLength()) : acc;
 						}, 0);
 						let max_available = {};
 						max_available[method] = _.reduce(remains_new, (acc, op_plans, op_id) => {
-							let plan = _.get(op_plans, `${ service }`, false);
+							let plan = (op_plans[service] || false);
 							return plan ? acc + plan.getLength() : acc;
 						}, 0);
 						let reserved = _.reduce(all_placed, (acc, tick) => {
@@ -409,20 +420,29 @@ class TSFactoryDataProvider {
 						_.set(acc, `${service}.${date}`, plan_stats);
 						return acc;
 					}, {});
-					// console.log("NEW", require('util')
-					// 	.inspect(stats, {
-					// 		depth: null
-					// 	}));
+				} else {}
+				// console.log("NEW", require('util')
+				// 	.inspect(stats, {
+				// 		depth: null
+				// 	}));
+				// let diff = process.hrtime(time);
+				// console.log('TSFDP QUOTA IN %d seconds', diff[0] + diff[1] / 1e9, method, params.quota_status);
+				// time = process.hrtime();
+				let placed_final;
+				// lost = _.filter(lost, r => (r.booking_method != "prebook" && r.state != "postponed"));
+				let fail = lost_new.length > 0;
+				if (fail) {
+					all_lost = all_lost.concat(placed_new);
+					placed_final = [];
+				} else {
+					placed_final = this.storage_accessor.set(placed_new);
 				}
-				let diff = process.hrtime(time);
-				console.log('TSFDP QUOTA IN %d seconds', diff[0] + diff[1] / 1e9, method, params.quota_status);
-				time = process.hrtime();
 
 				return Promise.props({
-					placed: this.storage_accessor.set(placed_new),
-					out_of_range,
+					placed: placed_final,
+					out_of_range: out_of_range,
 					lost: all_lost,
-					stats
+					stats: stats
 				});
 			});
 	}
